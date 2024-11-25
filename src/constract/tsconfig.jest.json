@@ -1,0 +1,36 @@
+{
+    "compilerOptions": {
+        "paths": {
+            "@config/*": [
+                "src/config/*"
+            ],
+            "@system/*": [
+                "src/system/*"
+            ],
+            "@runtime/*": [
+                "src/runtime/*"
+            ],
+            "@models/*": [
+                "src/system/models/*"
+            ],
+            "@routes/*": [
+                "src/system/routes/*"
+            ],
+            "@modules/*": [
+                "src/system/modules/*"
+            ],
+            "@services/*": [
+                "src/system/services/*"
+            ],
+            "@components/*": [
+                "src/system/components/*"
+            ],
+            "@controllers/*": [
+                "src/system/controllers/*"
+            ],
+            "@environment/*": [
+                "src/environment/*"
+            ]
+        }
+    }
+}
