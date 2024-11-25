@@ -1,0 +1,71 @@
+{
+    "name": "@remotex-labs/xstruct",
+    "main": "dist/cjs/index.js",
+    "type": "module",
+    "types": "./dist/index.d.ts",
+    "module": "./dist/esm/index.js",
+    "author": "Garefild",
+    "version": "v1.0.0-local",
+    "license": "Mozilla Public License Version 2.0",
+    "description": "A library with a sourcemap parser and TypeScript code formatter for the CLI",
+    "homepage": "https://github.com/remotex-lab/xStruct",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/remotex-lab/xStruct.git"
+    },
+    "bugs": {
+        "url": "https://github.com/remotex-lab/xStruct/issues"
+    },
+    "keywords": [
+        "xStruct",
+        "xstruct",
+        "struct",
+        "bit struct",
+        "typescript",
+        "formatter",
+        "CLI",
+        "javascript",
+        "developer-tools"
+    ],
+    "engines": {
+        "node": ">=18"
+    },
+    "exports": {
+        "./package.json": "./package.json",
+        ".": {
+            "import": {
+                "types": "./dist/index.d.ts",
+                "default": "./dist/esm/index.js"
+            },
+            "require": {
+                "types": "./dist/index.d.ts",
+                "default": "./dist/cjs/index.js"
+            }
+        }
+    },
+    "files": [
+        "dist",
+        "LICENSE",
+        "README.md"
+    ],
+    "scripts": {
+        "dev": "xBuild -w",
+        "test": "jest",
+        "build": "xBuild",
+        "test:coverage": "jest --coverage",
+        "lint": "xbuild --tc && eslint . -c ./eslint.config.mjs",
+        "ci:test": "jest",
+        "ci:clean": "rm -rf ./dist",
+        "ci:build": "npm run build"
+    },
+    "devDependencies": {
+        "jest": "^29.7.0",
+        "eslint": "^9.15.0",
+        "typescript-eslint": "^8.16.0",
+        "eslint-plugin-jsdoc": "^50.6.0",
+        "@swc/jest": "^0.2.36",
+        "@types/jest": "^29.5.14",
+        "@types/node": "^22.10.0",
+        "@remotex-labs/xbuild": "^1.3.6"
+    }
+}
