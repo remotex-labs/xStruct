@@ -65,7 +65,7 @@
         "eslint-plugin-jsdoc": "^50.5.0",
         "@swc/jest": "^0.2.36",
         "@types/jest": "^29.5.14",
-        "@types/node": "^22.9.3",
+        "@types/node": "^22.10.0",
         "@remotex-labs/xbuild": "^1.3.6"
     },
     "dependencies": {
