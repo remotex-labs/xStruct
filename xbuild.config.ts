@@ -31,15 +31,15 @@ const config: Array<xBuildConfig> = [
             entryPoints: [ 'src/index.ts' ]
         }
     },
-    {
-        declaration: false,
-        noTypeChecker: true,
-        esbuild: {
-            bundle: true,
-            format: 'cjs',
-            outdir: 'dist/cjs'
-        }
-    }
+    // {
+    //     declaration: false,
+    //     noTypeChecker: true,
+    //     esbuild: {
+    //         bundle: true,
+    //         format: 'cjs',
+    //         outdir: 'dist/cjs'
+    //     }
+    // }
 ];
 
 export default config;
