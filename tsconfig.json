@@ -26,12 +26,6 @@
         "paths": {
             "@services/*": [
                 "./services/*"
-            ],
-            "@providers/*": [
-                "./providers/*"
-            ],
-            "@components/*": [
-                "./components/*"
             ]
         }
     },
