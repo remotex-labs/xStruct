@@ -15,10 +15,11 @@ export default tseslint.config(
             'padded-blocks': 'off',
             'no-unused-vars': 'off',
             'no-invalid-this': 'warn',
-            'no-dupe-class-members': 'warn',
+            'no-dupe-class-members': 'off',
             'newline-before-return': 'error',
             '@typescript-eslint/no-unused-vars': 'error',
             '@typescript-eslint/no-explicit-any': 'warn',
+            "@typescript-eslint/no-dupe-class-members": "error",
             '@typescript-eslint/consistent-type-imports': ['error', { 'prefer': 'type-imports' }],
             'comma-dangle': ['error', 'never'],
 
