@@ -7,7 +7,7 @@
     "author": "Garefild",
     "version": "v1.0.0-local",
     "license": "Mozilla Public License Version 2.0",
-    "description": "A library with a sourcemap parser and TypeScript code formatter for the CLI",
+    "description": "This library provides a simple way to define and serialize data structures (structs) with support for both regular fields and bitfields",
     "homepage": "https://github.com/remotex-lab/xStruct",
     "repository": {
         "type": "git",
