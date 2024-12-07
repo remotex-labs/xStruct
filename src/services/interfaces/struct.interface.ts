@@ -88,7 +88,7 @@ export interface FieldInterface {
 /**
  * The `ParseFieldInterface` defines the structure of a field that can be parsed for its type and size.
  * This interface is used when processing fields that can represent various types, including primitive types,
- * integers, unsigned integers, bit fields, and strings.
+ * integers, unsigned integers, bit fields, strings, and arrays.
  *
  * - **`type`**: The type of the field.
  *   It can be one of the following:
@@ -96,12 +96,14 @@ export interface FieldInterface {
  *   - `'string'` — A string type.
  *   - `BitSizeType` (e.g., `'Int:2'`, `'UInt:3'`) — Represents a bit field size, where `Int` and `UInt` are integer types
  *     with a specified number of bits.
+ *   - `Struct` — A structured type that can represent more complex fields (e.g., custom object-like structures).
  *
  * - **`size`**: The size of the field.
  *   The interpretation of `size` depends on the `type`:
  *   - For **primitive types** (e.g., `'Int8'`, `'UInt8'`), the `size` represents the number of bytes.
  *   - For **string fields**, `size` represents the number of characters in the string (measured in bytes).
  *   - For **bit field types** (e.g., `'Int:n'`, `'UInt:n'`), `size` indicates the number of bits specified for the field.
+ *   - For **arrays**, `size` represents the size of each element in the array.
  *
  *   - **Important**: If `isBits` is `false`, the `size` represents the byte size of the field. If `isBits` is `true`, the `size` represents the bit size.
  *
@@ -109,14 +111,19 @@ export interface FieldInterface {
  *   - **`true`**: The `size` is in bits (e.g., for bit fields like `'UInt:3'`).
  *   - **`false`**: The `size` is in bytes (e.g., for primitive types like `'UInt8'` or strings).
  *
+ * - **`arraySize`**: The number of elements in the array. If provided, the field is considered an array, and `size` represents the size of each element.
+ *   - **`undefined` or omitted**: The field is not an array, and `size` represents the size of a single element.
+ *
  * ## Example:
  *
  * ```ts
  * const field1: ParseFieldInterface = { type: 'Int8', size: 1, isBits: false };    // Signed integer, byte
  * const field2: ParseFieldInterface = { type: 'UInt8', size: 1, isBits: false };   // Unsigned integer, byte
  * const field3: ParseFieldInterface = { type: 'string', size: 10, isBits: false }; // String, 10 characters (bytes)
- * const field4: ParseFieldInterface = { type: 'UInt8', size: 8, isBits: true };   // 8-bit unsigned integer
- * const field5: ParseFieldInterface = { type: 'Int', size: 3, isBits: true };     // 3-bit signed integer (bit field)
+ * const field4: ParseFieldInterface = { type: 'UInt8', size: 8, isBits: true };    // 8-bit unsigned integer
+ * const field5: ParseFieldInterface = { type: 'Int', size: 3, isBits: true };      // 3-bit signed integer (bit field)
+ * const field6: ParseFieldInterface = { type: 'Int8', size: 1, arraySize: 5 };     // Array of 5 signed integers, each byte
+ * const field7: ParseFieldInterface = { type: 'string', size: 2, arraySize: 3 };   // Array of 3 strings, each 2 bytes
  * ```
  *
  * This interface is typically used in contexts where fields need to be parsed and processed based on their types and sizes,
@@ -127,6 +134,7 @@ export interface ParseFieldInterface {
     type: PrimitiveType | 'string' | Struct;
     size: number;
     isBits?: boolean;
+    arraySize?: number;
 }
 
 /**
@@ -174,24 +182,28 @@ export interface StructSchemaInterface {
 
 /**
  * The `SchemaFieldType` represents the structure of a single field in a schema.
- * This type is used to describe
- * the characteristics of a field, including its type, size, offset, whether it's a bitfield, and the bit position
- * within the byte (if it's a bitfield).
+ * This type is used to describe the characteristics of a field, including its type, size, offset,
+ * whether it's a bitfield,
+ * and the bit position within the byte (if it's a bitfield).
+ * It is commonly used in schema definitions for binary data layouts.
  *
- * - **type**: The data type of the field. It can be a `PrimitiveType` (e.g., `'UInt8'`, `'Int16'`) or any string
- *   that represents the type of the field. For example, bitfields may be represented as strings with size information (e.g., `'UInt8:4'`).
+ * - **type**: The data type of the field.
+ * It can be a `PrimitiveType` (e.g., `'UInt8'`, `'Int16'`) or any string that represents the type of the field.
+ *   For example, bitfields may be represented as strings with size information (e.g., `'UInt8:4'`).
  *
  * - **size**: The size of the field in bytes. For bitfields, this represents the number of bits, and for primitive types,
  *   it is the size of bytes (e.g., byte for `UInt8`, 2-bytes for `UInt16`).
  *
- * - **offset**: The byte offset of the field within the structure. This is used to determine where the field starts
- *   within the byte array or buffer.
+ * - **offset**: The byte offset of the field within the structure. This determines where the field starts within the byte array or buffer.
  *
- * - **isBits**: A boolean flag indicating whether the field is a bitfield. If `true`, the field is a bitfield and occupies
- *   part of a byte. If `false`, it is a regular primitive type field.
+ * - **isBits**: A boolean flag indicating whether the field is a bitfield. If `true`, the field is a bitfield and occupies part of a byte.
+ *   If `false`, it is a regular primitive type field.
  *
- * - **position** (optional): Only used for bitfields. This indicates the position of the bitfield within its byte.
- *   Bitfields are stored within bytes, and the `position` helps determine the specific bit's location within that byte.
+ * - **position** (optional): Only used for bitfields. This indicates the position of the bitfield within its byte. Bitfields are stored
+ *   within bytes, and the `position` helps determine the specific bit's location within that byte.
+ *
+ * - **arraySize** (optional): Represents the number of elements in the array if the field is an array type. This field can be used
+ *   for array fields that have a fixed size, such as `'UInt8[5]'` for an array sizeof 5`UInt8` elements.
  *
  * ## Example:
  * ```ts
@@ -209,11 +221,21 @@ export interface StructSchemaInterface {
  *     isBits: true,
  *     position: 0
  * };
+ *
+ * const field3: SchemaFieldType = {
+ *     type: 'UInt8',
+ *     size: 1,
+ *     offset: 0,
+ *     isBits: false,
+ *     arraySize: 5
+ * };
  * ```
  *
  * ## Error Handling:
  * - This type is a descriptor for a field and is typically used as part of a larger schema structure. There are no specific
- *   error handling requirements, but ensure that fields are correctly defined with the appropriate size and type information.
+ *   error handling requirements, but ensure that fields are correctly defined with the appropriate size, type, and offset information.
+ *
+ * @type {SchemaFieldType}
  */
 
 export type SchemaFieldType = {
@@ -222,6 +244,7 @@ export type SchemaFieldType = {
     offset: number, // offset of the byte for this bitmap or primitive type
     isBits: boolean,
     position?: number; // only in bitmap true show the position in the bits
+    arraySize?: number;
 }
 
 /**
