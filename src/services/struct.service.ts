@@ -9,7 +9,8 @@ import type {
     PrimitiveType,
     SchemaFieldType,
     SchemaInterface,
-    StructSchemaInterface
+    StructSchemaInterface,
+    WriteMethodType
 } from '@services/interfaces/struct.interface';
 
 export class Struct {
@@ -420,20 +421,224 @@ export class Struct {
     }
 
     /**
+     * The `validateFieldType` method validates the type of value based on the specified field's type.
+     * This method ensures that the value matches the expected type defined in the field schema, throwing an error
+     * if there is a type mismatch.
+     * It checks for different field types such as `string`, `BigInt`, and `number`.
+     *
+     * - **Input**:
+     *   - `field`: The schema field that defines the expected type of the value.
+     *   - `value`: The value to be validated against the field's type.
+     *
+     * - **Error Handling**:
+     *   - Throws a `TypeError` if the type of the value does not match the expected type for the given field.
+     *
+     * ## Example:
+     * ```ts
+     * const field1: SchemaFieldType = { type: 'string', size: 10, offset: 0, isBits: false };
+     * validateFieldType(field1, "Hello World"); // No error
+     *
+     * const field2: SchemaFieldType = { type: 'BigInt64BE', size: 8, offset: 0, isBits: false };
+     * validateFieldType(field2, 123n); // No error
+     *
+     * const field3: SchemaFieldType = { type: 'UInt8', size: 1, offset: 0, isBits: false };
+     * validateFieldType(field3, 42); // No error
+     *
+     * const field4: SchemaFieldType = { type: 'string', size: 10, offset: 0, isBits: false };
+     * validateFieldType(field4, 42); // Throws TypeError: Expected a string for field "string", but received number
+     * ```
+     *
+     * ## Notes:
+     * - The method checks if the field type is `string`, `BigInt`, or `number`, and ensures that the value matches the expected type.
+     * - If the field is of type `BigInt` (i.e., contains "Big"), it ensures that the value is of type `bigint`.
+     * - If the field is not of type `BigInt`, it ensures that the value is of type `number`.
+     * - If the value does not match the expected type, a `TypeError` is thrown, indicating the mismatch.
+     *
+     * @param field - The field schema defining the expected type of the value.
+     * @param value - The value to be validated.
+     * @throws {TypeError} If the value does not match the expected type.
+     */
+
+    private validateFieldType(field: SchemaFieldType, value: unknown): void {
+        const isBigIntType = (<string> field.type).includes('Big');
+        if (isBigIntType && typeof value !== 'bigint') {
+            throw new TypeError(`Expected a BigInt for field "${ field.type }", but received ${ typeof value }`);
+        }
+
+        if (!isBigIntType && typeof value !== 'number') {
+            throw new TypeError(`Expected a number for field "${ field.type }", but received ${ typeof value }`);
+        }
+    }
+
+    /**
+     * The `getBufferWriteMethod` method retrieves the appropriate write method from the buffer based on the field's type.
+     * This method dynamically constructs the method name using the field's type and returns the corresponding to write method
+     * from the buffer.
+     * If the method does not exist, it throws an error.
+     *
+     * - **Input**:
+     *   - `buffer`: The buffer object that contains the write methods for various field types.
+     *   - `field`: The schema field that contains the type information to determine the appropriate write method.
+     *
+     * - **Output**:
+     *   - Returns the write method for the specified field type.
+     *
+     * - **Error Handling**:
+     *   - Throws a `TypeError` if no write method is available for the specified field type.
+     *
+     * ## Example:
+     * ```ts
+     * const buffer = Buffer.alloc(10);
+     * const field: SchemaFieldType = {
+     *     type: 'UInt8',
+     *     size: 1,
+     *     offset: 0,
+     *     isBits: false
+     * };
+     * const method = getBufferWriteMethod(buffer, field);
+     * console.log(method); // Returns the write method for the 'UInt8' type, e.g., 'writeUInt8'
+     * ```
+     *
+     * ## Notes:
+     * - The method name is dynamically constructed by concatenating `write` with the field's type (e.g., `writeUInt8` for `UInt8`).
+     * - Ensure that the buffer supports the appropriate write method for the given field type.
+     *
+     * @param buffer - The buffer object to retrieve the write method from.
+     * @param field - The schema field that defines the field type.
+     * @returns The corresponding write method for the given field type.
+     * @throws {TypeError} If no write method is available for the field type.
+     */
+
+    private getBufferWriteMethod(buffer: Buffer, field: SchemaFieldType): WriteMethodType {
+        const method = <WriteMethodType> (
+            buffer[<keyof Buffer> ('write' + field.type)]
+        );
+
+        if (!method) {
+            throw new TypeError(`No write method available for field type "${ field.type }"`);
+        }
+
+        return method;
+    }
+
+    /**
+     * The `writeArrayField` method writes an array of values to the buffer according to the schema field's type.
+     * It iterates over the array and writes each element to the buffer.
+     * If the array is smaller than the specified size, missing elements are written as `0`.
+     * If the array is larger than the specified size, it writes only up to the allowed size.
+     *
+     * - **Input**:
+     *   - `buffer`: The buffer to which the array of field values will be written.
+     *   - `field`: The schema field that describes the type, size, and other attributes of the field.
+     *   - `value`: The array of values to be written.
+     *   Each element in the array is validated and written to the buffer based on the field's specifications.
+     *
+     * - **Error Handling**:
+     *   - Throws a `TypeError` if the provided value is not an array.
+     *   - Each element in the array is validated using `validateFieldType`
+     *   to ensure it matches the expected type for the field.
+     *   - Throws a `TypeError` if the value is not the correct type according to the field's schema.
+     *
+     * ## Example:
+     * ```ts
+     * const buffer = Buffer.alloc(10);
+     * const field: SchemaFieldType = {
+     *     type: 'UInt8',
+     *     size: 1,
+     *     offset: 0,
+     *     isBits: false,
+     *     arraySize: 3
+     * };
+     * const values = [10, 20, 30];
+     * writeArrayField(buffer, field, values);
+     * console.log(buffer); // The buffer will have the values 10, 20, and 30 written at the specified offsets
+     * ```
+     *
+     * ## Notes:
+     * - If the provided array is smaller than the specified `arraySize`, the missing elements will be filled with `0`.
+     * - If the provided array is larger than the specified `arraySize`,
+     * only the elements up to the `arraySize` will be written.
+     *
+     * @param buffer - The buffer to write the field values into.
+     * @param field - The schema field that defines the type and size of the field to write.
+     * @param value - The array of values to write into the buffer.
+     * @throws {TypeError} If the value is not an array or if any element does not match the expected type.
+     */
+
+    private writeArrayField(buffer: Buffer, field: Required<SchemaFieldType>, value: unknown): void {
+        if (!Array.isArray(value)) {
+            throw new TypeError(`Expected an array for field "${ field.type }", but received ${ typeof value }`);
+        }
+
+        const isBigIntType = (<string> field.type).includes('Big');
+        const method = this.getBufferWriteMethod(buffer, field);
+
+        for (let i = 0; i < field.arraySize; i++) {
+            const elementValue = (<Array<unknown>> value)[i] || 0; // Use 0 for missing elements
+            this.validateFieldType(field, elementValue); // Validate each array element
+            const finalValue = isBigIntType
+                ? BigInt(<number> elementValue)
+                : <number> elementValue;
+
+            method.call(buffer, finalValue, field.offset + (i * field.size)); // Move the offset by field size per element
+        }
+    }
+
+    /**
+     * The `prepareValue` method converts the provided value to the appropriate type based on the field's type.
+     * If the field type includes 'Big', the value will be converted to a `BigInt`.
+     * Otherwise, it will be treated as a `number`.
+     *
+     * - **Input**:
+     *   - `field`: The schema field that defines the type of the value.
+     *   This is used to determine if the value should be converted to `BigInt`.
+     *   - `value`: The value to be converted, which can be either a `number` or a value to be interpreted as a `BigInt`.
+     *
+     * - **Output**: A `bigint` or `number`, depending on the field's type.
+     * If the field type includes 'Big' (e.g., `BigInt64LE`), the value is converted to a `BigInt`.
+     * Otherwise, it is returned as a `number`.
+     *
+     * ## Example:
+     * ```ts
+     * const field: SchemaFieldType = { type: 'BigInt64LE', size: 8, offset: 0, isBits: false };
+     * const value = 1234;
+     * const preparedValue = prepareValue(field, value);
+     * console.log(preparedValue); // Outputs: 1234n (BigInt)
+     *
+     * const field2: SchemaFieldType = { type: 'UInt32LE', size: 4, offset: 0, isBits: false };
+     * const value2 = 5678;
+     * const preparedValue2 = prepareValue(field2, value2);
+     * console.log(preparedValue2); // Outputs: 5678 (number)
+     * ```
+     */
+
+    private prepareValue(field: SchemaFieldType, value: unknown): bigint | number {
+        return (<string> field.type).includes('Big') ? BigInt(value as number) : value as number;
+    }
+
+    /**
      * The `writeField` method writes a value to the buffer according to its field type.
-     * It handles different types of values (e.g., strings, numbers, and BigInts) by calling the appropriate buffer write method.
+     * It handles different types of values (e.g., strings, numbers, BigInts) and supports arrays.
+     * If an array is provided, it validates the array length and writes each element, padding shorter arrays with 0s.
      *
      * - **Input**:
      *   - `buffer`: The buffer to which the field value will be written.
-     *   - `field`: The schema field containing information about the field's type, size, and offset.
-     *   - `value`: The value to be written into the buffer.
+     *   - `field`: The schema field containing information about the field's type, size, offset, and array size.
+     *   - `value`: The value to be written into the buffer, which can be a single value or an array of values.
      *
      * - **Error Handling**:
-     *   - Throws a `TypeError` if the value is not a valid `number` or `BigInt` for numeric fields.
-     *   - For string fields, it assumes the value is a valid string and writes it directly to the buffer.
+     *   - Throws a `TypeError`
+     *   if the value is not a valid type (e.g., string, number, or BigInt) based on the field type.
+     *   - If the field is an array, it ensures the value is an array and validates the array size.
      */
 
     private writeField(buffer: Buffer, field: SchemaFieldType, value: unknown): void {
+        if (field.arraySize) {
+            this.writeArrayField(buffer, <Required<SchemaFieldType>> field, value);
+
+            return;
+        }
+
         if (field.type === 'string') {
             if (typeof value !== 'string') {
                 throw new TypeError(`Expected a string for field "${ field.type }", but received ${ typeof value }`);
@@ -444,23 +649,10 @@ export class Struct {
             return;
         }
 
-        const isBigIntType = (<string> field.type).includes('Big');
-        if (isBigIntType && typeof value !== 'bigint') {
-            throw new TypeError(`Expected a BigInt for field "${ field.type }", but received ${ typeof value }`);
-        } else if (!isBigIntType && typeof value !== 'number') {
-            throw new TypeError(`Expected a number for field "${ field.type }", but received ${ typeof value }`);
-        }
+        this.validateFieldType(field, value);
+        const method = this.getBufferWriteMethod(buffer, field);
+        const finalValue = this.prepareValue(field, value);
 
-        const method = <(...args: Array<unknown>) => unknown> (
-            buffer[<keyof Buffer> ('write' + field.type)]
-        );
-
-        // Convert value to the correct type (BigInt or number)
-        const finalValue: bigint | number = isBigIntType
-            ? BigInt(value as number)
-            : value as number;
-
-        // Write the value to the buffer
         method.call(buffer, finalValue, field.offset);
     }
 
