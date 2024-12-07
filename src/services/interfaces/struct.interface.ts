@@ -169,7 +169,7 @@ export interface ParseFieldInterface {
  */
 
 export interface StructSchemaInterface {
-    [name: string]: BitSizeType | PrimitiveType | FieldInterface | Struct
+    [name: string]: BitSizeType | PrimitiveType | FieldInterface | Struct;
 }
 
 /**
@@ -268,5 +268,5 @@ export type SchemaFieldType = {
  */
 
 export interface SchemaInterface {
-    [name: string]: SchemaFieldType
+    [name: string]: SchemaFieldType;
 }
