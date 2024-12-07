@@ -71,6 +71,35 @@ export type PrimitiveType =
     | 'BigUInt64BE';
 
 /**
+ * The `PrimitiveArrayType` type represents a primitive type with an optional array size specification.
+ * This type is a template literal type that combines a standard `PrimitiveType` with an array size in the format `[]`.
+ * It is used when a field is of a primitive type and has a specified number of elements (e.g., an array of integers).
+ *
+ * - **Input**: A string that represents a primitive type, followed by an array size in square brackets.
+ *   - The `PrimitiveType` can be any valid primitive type, such as `'Int8'`, `'UInt16BE'`, `'Int32LE'`, etc.
+ *   - The array size is a number (e.g., `'UInt32BE[5]'`, which represents an array of 5-elements for `UInt32BE` type).
+ *
+ * ## Example:
+ *
+ * ```ts
+ * const field1: PrimitiveArrayType = 'Int8[10]';      // Array of 10 signed 8-bit integers
+ * const field2: PrimitiveArrayType = 'UInt32BE[5]';   // Array of 5 unsigned 32-bit integers in big-endian format
+ * const field3: PrimitiveArrayType = 'Int16LE[100]';  // Array of 100 signed 16-bit integers in little-endian format
+ * ```
+ *
+ * ## Supported Formats:
+ * - The `PrimitiveArrayType` is a combination of any `PrimitiveType` (e.g., `'Int8'`, `'UInt32BE'`)
+ * followed by an array size in the format `[n]`, where `n` is a positive integer (e.g., `'Int8[10]'`, `'UInt16LE[3]'`).
+ *
+ * @example
+ * 'UInt32BE[5]'   // An array of 5 unsigned 32-bit integers in big-endian format.
+ * 'Int8[10]'      // An array of 10 signed 8-bit integers.
+ * 'Int16LE[100]'  // An array of 100 signed 16-bit integers in little-endian format.
+ */
+
+export type PrimitiveArrayType = `${ PrimitiveType }[${ number }]`;
+
+/**
  * The FieldInterface defines the structure of a field that is of type string.
  *
  * - **size**: The length of the string field, in bytes.
@@ -177,7 +206,7 @@ export interface ParseFieldInterface {
  */
 
 export interface StructSchemaInterface {
-    [name: string]: BitSizeType | PrimitiveType | FieldInterface | Struct;
+    [name: string]: BitSizeType | PrimitiveType | PrimitiveArrayType | FieldInterface | Struct;
 }
 
 /**
