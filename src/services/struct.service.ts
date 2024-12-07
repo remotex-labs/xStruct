@@ -704,54 +704,94 @@ export class Struct {
     }
 
     /**
-     * The `readField` method reads a field from the given buffer based on its type and offset. It handles reading different
-     * types of fields, including strings and numeric types (e.g., `UInt8`, `Int8`, `UInt16`), and returns the corresponding
-     * value after decoding it from the buffer.
+     * The `readField` method reads a field (or array of fields) from the given buffer based on its type and offset.
+     * It handles reading different types of fields, including strings, numeric types (`UInt8`, `Int16BE`, etc.),
+     * and arrays of these types. The method decodes the field's value from the buffer and returns it.
      *
      * - **Input**:
      *   - `buffer`: A `Buffer` object containing the raw data.
-     *   - `field`: A `SchemaFieldType` object that defines the field's properties such as `offset`, `type`, and `size`.
+     *   - `field`: A `SchemaFieldType` object that defines the field's properties such as `offset`, `type`, `size`, and `arraySize`.
      *
      * - **Output**:
-     *   - The value of the field, which can be a `string`, `number`, or `bigint`, depending on the field's type.
+     *   - The value of the field, which can be a `string`, `number`, `bigint`, or an array of these types, depending on the field's properties.
      *
      * ## Example:
      *
+     * ### Reading a Single Field:
      * ```ts
      * const buffer = Buffer.alloc(8);
      * buffer.writeUInt8(123, 0);
-     * const field = { offset: 0, type: 'UInt8', size: 1 };
+     * const field = { offset: 0, type: 'UInt8', size: 1, isBits: false };
      * const value = readField(buffer, field);
      * console.log(value); // Expected Output: 123
+     * ```
      *
+     * ### Reading a String:
+     * ```ts
      * const stringBuffer = Buffer.from('Hello\x00\x00\x00');
-     * const stringField = { offset: 0, type: 'string', size: 5 };
+     * const stringField = { offset: 0, type: 'string', size: 5, isBits: false };
      * const stringValue = readField(stringBuffer, stringField);
      * console.log(stringValue); // Expected Output: 'Hello'
      * ```
      *
+     * ### Reading an Array:
+     * ```ts
+     * const arrayBuffer = Buffer.alloc(12);
+     * arrayBuffer.writeUInt8(1, 0);
+     * arrayBuffer.writeUInt8(2, 1);
+     * arrayBuffer.writeUInt8(3, 2);
+     * const arrayField = { offset: 0, type: 'UInt8', size: 1, arraySize: 3, isBits: false };
+     * const arrayValue = readField(arrayBuffer, arrayField);
+     * console.log(arrayValue); // Expected Output: [1, 2, 3]
+     * ```
+     *
      * ## Error Handling:
-     * - This method assumes the `field` object contains valid `offset`, `size`, and `type` properties, and the `buffer` is
-     *   large enough to accommodate the requested field.
-     * - If the type is unrecognized, this method will throw a runtime error due to the invalid `method` call.
+     * - Assumes the `field` object contains valid `offset`, `size`, `type`, and optionally `arraySize`.
+     * - Throws an error if the `buffer` does not have sufficient data for the specified field(s).
+     * - Throws an error if an invalid `field.type` is encountered.
      *
      * @param buffer - The `Buffer` object containing the data to be read.
-     * @param field - The `SchemaFieldType` object describing the field’s `offset`, `type`, and `size`.
-     * @returns The decoded value from the buffer as a `string`, `number`, or `bigint` based on the field type.
+     * @param field - The `SchemaFieldType` object describing the field's `offset`, `type`, `size`, and optionally `arraySize`.
+     * @returns The decoded value from the buffer as a `string`, `number`, `bigint`, or array based on the field type.
      */
 
-    private readField(buffer: Buffer, field: SchemaFieldType): number | bigint | string {
+    private readField(buffer: Buffer, field: SchemaFieldType): number | bigint | string | Array<number | bigint | string> {
         const byteOffset = field.offset;
 
-        // If the field is a string, we read it as a string from the buffer
+        // Handle string fields
         if (field.type === 'string') {
             return buffer.toString('utf8', byteOffset, byteOffset + field.size).replace(/\x00+$/, '');
         }
 
-        // For other types (UInt8, Int8, UInt16, etc.), use the corresponding Buffer method to read the value
+        // Get the Buffer read method for numeric fields
         const method = <(...args: Array<unknown>) => unknown> buffer[<keyof Buffer> ('read' + field.type)];
 
-        return <bigint | number> method.call(buffer, byteOffset, field.size);
+        if (!method) {
+            throw new TypeError(`No read method available for field type "${field.type}"`);
+        }
+
+        // Handle array fields
+        if (field.arraySize) {
+            const values: Array<number | bigint> = [];
+            const elementSize = field.size;
+            for (let i = 0; i < field.arraySize; i++) {
+                const offset = byteOffset + (i * elementSize);
+
+                // Ensure buffer has enough data
+                if (offset + elementSize > buffer.length) {
+                    throw new RangeError(`Insufficient buffer length to read array element at index ${i}`);
+                }
+
+                // Read the value at the current offset
+                const value = <number | bigint> method.call(buffer, offset);
+                values.push(value);
+            }
+
+            return values;
+        }
+
+        // Handle single numeric fields
+        return <number | bigint> method.call(buffer, byteOffset);
     }
 
     /**
