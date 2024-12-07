@@ -61,7 +61,7 @@
     "devDependencies": {
         "jest": "^29.7.0",
         "eslint": "^9.16.0",
-        "typescript-eslint": "^8.16.0",
+        "typescript-eslint": "^8.17.0",
         "eslint-plugin-jsdoc": "^50.6.0",
         "@swc/jest": "^0.2.36",
         "@types/jest": "^29.5.14",
