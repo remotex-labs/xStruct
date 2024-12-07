@@ -4,11 +4,11 @@
 
 import type {
     BitSizeType,
+    FieldInterface,
+    ParseFieldInterface,
     PrimitiveType,
     SchemaFieldType,
-    FieldInterface,
     SchemaInterface,
-    ParseFieldInterface,
     StructSchemaInterface
 } from '@services/interfaces/struct.interface';
 
@@ -613,10 +613,14 @@ export class Struct {
      *   - `'Int8'`, `'UInt8'` — 1 byte
      *   - `'Int16LE'`, `'Int16BE'`, `'UInt16LE'`, `'UInt16BE'` — 2 bytes
      *   - `'Int32LE'`, `'Int32BE'`, `'UInt32LE'`, `'UInt32BE'` — 4 bytes
-     *   - `'Int64LE'`, `'Int64BE'`, `'UInt64LE'`, `'UInt64BE'` — 8 bytes
+     *   - `'BigInt64LE'`, `'BigInt64BE'`, `'BigUInt64LE'`, `'BigUInt64BE'` — 8 bytes
      *
      * - **Output**: A `ParseFieldInterface` object with the corresponding `type`, `size` (in bytes),
-     * and `isBits` (set to `false`).
+     *   `isBits` (set to `false`), and an optional `arraySize` (the number of elements in the array, if applicable).
+     *
+     * - **Optional `arraySize`**: If provided, the field is considered an array,
+     * and `size` represents the size of each element in the array.
+     *   - If `arraySize` is not provided, the field is treated as a single element.
      *
      * ## Example:
      *
@@ -626,17 +630,21 @@ export class Struct {
      *
      * const field2 = parsePrimitiveField('UInt16LE');
      * console.log(field2); // { type: 'UInt16LE', size: 2, isBits: false }
+     *
+     * const field3 = parsePrimitiveField('Int32BE', 5);
+     * console.log(field3); // { type: 'Int32BE', size: 4, isBits: false, arraySize: 5 }
      * ```
      *
      * ## Error Handling:
      * - If the provided type is unsupported, the method throws a `TypeError`.
      *
      * @param type - The type of the field, which can be one of the supported primitive types.
+     * @param arraySize - An optional number representing the size of the array (defaults to `undefined` if not provided).
      * @returns A `ParseFieldInterface` object representing the field type and size in bytes, with `isBits` set to `false`.
      * @throws {TypeError} If the input type is unsupported.
      */
 
-    private parsePrimitiveField(type: PrimitiveType): ParseFieldInterface {
+    private parsePrimitiveField(type: PrimitiveType, arraySize?: number): ParseFieldInterface {
         const typeSizes: { [key in PrimitiveType]: number } = {
             'Int8': 1, 'UInt8': 1,
             'Int16LE': 2, 'Int16BE': 2, 'UInt16LE': 2, 'UInt16BE': 2,
@@ -645,28 +653,45 @@ export class Struct {
         };
 
         if (typeSizes[type]) {
-            return { type, size: typeSizes[type], isBits: false };
+            return { type, size: typeSizes[type], isBits: false, arraySize: arraySize };
         }
 
         throw new TypeError(`Unsupported primitive type: ${ type }`);
     }
 
     /**
-     * The `parseField` method parses a given field, determining whether it's a string type or an object
+     * The `parseField` method parses a given field, determining whether it's a string type, an object, or a bit field,
      * and returns a `ParseFieldInterface` object. It will call the appropriate parsing function based on
-     * whether the field is a bit field or a primitive type.
+     * whether the field is a primitive type or a bit field.
      *
-     * - **Input**: A `FieldInterface` or string that represents the field type.
-     * - **Output**: A `ParseFieldInterface` object with the parsed field details (type, size, isBit).
+     * - **Input**: A `FieldInterface`, `string`, or `Struct` that represents the field type.
+     *   - If the input is a **string**, it can represent either a primitive type (e.g., `'Int8'`) or a bit field (e.g., `'UInt8:4'`).
+     *   - If the input is an **object** of type `Struct`, the method returns the field based on the structure's properties.
+     * - **Output**: A `ParseFieldInterface` object with the parsed field details, including:
+     *   - `type`: The field type (e.g., `'Int8'`, `'UInt8'`).
+     *   - `size`: The size of the field in bytes.
+     *   - `isBits`: A boolean indicating if the field is a bit field (`true`) or not (`false`).
+     *   - `arraySize`: (Optional) The number of elements in an array if the field type includes an array format (e.g., `'string[10]'`).
      *
      * ## Example:
+     *
      * ```ts
-     * const fieldObject = parseField('Int8'); // Returns { type: 'Int8', size: 1, isBit: false }
-     * const fieldObject2 = parseField('UInt8:4'); // Returns { type: 'UInt8', size: 4, isBit: true }
+     * const fieldObject = parseField('Int8');
+     * console.log(fieldObject); // Returns { type: 'Int8', size: 1, isBits: false }
+     *
+     * const fieldObject2 = parseField('UInt8:4');
+     * console.log(fieldObject2); // Returns { type: 'UInt8', size: 4, isBits: true }
+     *
+     * const fieldObject3 = parseField('string[10]');
+     * console.log(fieldObject3); // Returns { type: 'string', size: 10, isBits: false, arraySize: 10 }
      * ```
      *
-     * @param field - The field to parse, which could be a string or an object.
+     * ## Error Handling:
+     * - If the provided field format is invalid or unsupported, the method may throw an error (e.g., invalid type or format).
+     *
+     * @param field - The field to parse, which could be a string or an object. A string can represent a primitive type or a bit field, and an object could be a `Struct`.
      * @returns A `ParseFieldInterface` object representing the parsed field.
+     * @throws {Error} If the input format is invalid or unsupported.
      */
 
     private parseField(field: FieldInterface | string | Struct): ParseFieldInterface {
@@ -675,9 +700,17 @@ export class Struct {
         }
 
         if (typeof field === 'string') {
-            return field.includes(':')
-                ? this.parseBitField(field as BitSizeType)
-                : this.parsePrimitiveField(field as PrimitiveType);
+            if (field.includes(':')) {
+                return this.parseBitField(field as BitSizeType);
+            }
+
+            const pattern = /^([a-z0-9]+)\[(\d+)\]$/i;
+            const match = field.match(pattern);
+            if (match) {
+                return this.parsePrimitiveField(match[1] as PrimitiveType, parseInt(match[2], 10));
+            }
+
+            return this.parsePrimitiveField(field as PrimitiveType);
         }
 
         return field;
@@ -807,6 +840,12 @@ export class Struct {
                 };
 
                 accumulator.bits = 0;
+                if (fieldObject.arraySize) {
+                    this.schema[fieldName].arraySize = fieldObject.arraySize;
+                    accumulator.bytes += fieldObject.size * fieldObject.arraySize;
+                    continue;
+                }
+
                 accumulator.bytes += fieldObject.size;
                 continue;
             }
