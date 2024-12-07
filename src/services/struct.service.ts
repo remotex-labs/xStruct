@@ -4,12 +4,13 @@
 
 import type {
     BitSizeType,
+    FieldInterface,
+    ParseFieldInterface,
     PrimitiveType,
     SchemaFieldType,
-    FieldInterface,
     SchemaInterface,
-    ParseFieldInterface,
-    StructSchemaInterface
+    StructSchemaInterface,
+    WriteMethodType
 } from '@services/interfaces/struct.interface';
 
 export class Struct {
@@ -420,20 +421,224 @@ export class Struct {
     }
 
     /**
+     * The `validateFieldType` method validates the type of value based on the specified field's type.
+     * This method ensures that the value matches the expected type defined in the field schema, throwing an error
+     * if there is a type mismatch.
+     * It checks for different field types such as `string`, `BigInt`, and `number`.
+     *
+     * - **Input**:
+     *   - `field`: The schema field that defines the expected type of the value.
+     *   - `value`: The value to be validated against the field's type.
+     *
+     * - **Error Handling**:
+     *   - Throws a `TypeError` if the type of the value does not match the expected type for the given field.
+     *
+     * ## Example:
+     * ```ts
+     * const field1: SchemaFieldType = { type: 'string', size: 10, offset: 0, isBits: false };
+     * validateFieldType(field1, "Hello World"); // No error
+     *
+     * const field2: SchemaFieldType = { type: 'BigInt64BE', size: 8, offset: 0, isBits: false };
+     * validateFieldType(field2, 123n); // No error
+     *
+     * const field3: SchemaFieldType = { type: 'UInt8', size: 1, offset: 0, isBits: false };
+     * validateFieldType(field3, 42); // No error
+     *
+     * const field4: SchemaFieldType = { type: 'string', size: 10, offset: 0, isBits: false };
+     * validateFieldType(field4, 42); // Throws TypeError: Expected a string for field "string", but received number
+     * ```
+     *
+     * ## Notes:
+     * - The method checks if the field type is `string`, `BigInt`, or `number`, and ensures that the value matches the expected type.
+     * - If the field is of type `BigInt` (i.e., contains "Big"), it ensures that the value is of type `bigint`.
+     * - If the field is not of type `BigInt`, it ensures that the value is of type `number`.
+     * - If the value does not match the expected type, a `TypeError` is thrown, indicating the mismatch.
+     *
+     * @param field - The field schema defining the expected type of the value.
+     * @param value - The value to be validated.
+     * @throws {TypeError} If the value does not match the expected type.
+     */
+
+    private validateFieldType(field: SchemaFieldType, value: unknown): void {
+        const isBigIntType = (<string> field.type).includes('Big');
+        if (isBigIntType && typeof value !== 'bigint') {
+            throw new TypeError(`Expected a BigInt for field "${ field.type }", but received ${ typeof value }`);
+        }
+
+        if (!isBigIntType && typeof value !== 'number') {
+            throw new TypeError(`Expected a number for field "${ field.type }", but received ${ typeof value }`);
+        }
+    }
+
+    /**
+     * The `getBufferWriteMethod` method retrieves the appropriate write method from the buffer based on the field's type.
+     * This method dynamically constructs the method name using the field's type and returns the corresponding to write method
+     * from the buffer.
+     * If the method does not exist, it throws an error.
+     *
+     * - **Input**:
+     *   - `buffer`: The buffer object that contains the write methods for various field types.
+     *   - `field`: The schema field that contains the type information to determine the appropriate write method.
+     *
+     * - **Output**:
+     *   - Returns the write method for the specified field type.
+     *
+     * - **Error Handling**:
+     *   - Throws a `TypeError` if no write method is available for the specified field type.
+     *
+     * ## Example:
+     * ```ts
+     * const buffer = Buffer.alloc(10);
+     * const field: SchemaFieldType = {
+     *     type: 'UInt8',
+     *     size: 1,
+     *     offset: 0,
+     *     isBits: false
+     * };
+     * const method = getBufferWriteMethod(buffer, field);
+     * console.log(method); // Returns the write method for the 'UInt8' type, e.g., 'writeUInt8'
+     * ```
+     *
+     * ## Notes:
+     * - The method name is dynamically constructed by concatenating `write` with the field's type (e.g., `writeUInt8` for `UInt8`).
+     * - Ensure that the buffer supports the appropriate write method for the given field type.
+     *
+     * @param buffer - The buffer object to retrieve the write method from.
+     * @param field - The schema field that defines the field type.
+     * @returns The corresponding write method for the given field type.
+     * @throws {TypeError} If no write method is available for the field type.
+     */
+
+    private getBufferWriteMethod(buffer: Buffer, field: SchemaFieldType): WriteMethodType {
+        const method = <WriteMethodType> (
+            buffer[<keyof Buffer> ('write' + field.type)]
+        );
+
+        if (!method) {
+            throw new TypeError(`No write method available for field type "${ field.type }"`);
+        }
+
+        return method;
+    }
+
+    /**
+     * The `writeArrayField` method writes an array of values to the buffer according to the schema field's type.
+     * It iterates over the array and writes each element to the buffer.
+     * If the array is smaller than the specified size, missing elements are written as `0`.
+     * If the array is larger than the specified size, it writes only up to the allowed size.
+     *
+     * - **Input**:
+     *   - `buffer`: The buffer to which the array of field values will be written.
+     *   - `field`: The schema field that describes the type, size, and other attributes of the field.
+     *   - `value`: The array of values to be written.
+     *   Each element in the array is validated and written to the buffer based on the field's specifications.
+     *
+     * - **Error Handling**:
+     *   - Throws a `TypeError` if the provided value is not an array.
+     *   - Each element in the array is validated using `validateFieldType`
+     *   to ensure it matches the expected type for the field.
+     *   - Throws a `TypeError` if the value is not the correct type according to the field's schema.
+     *
+     * ## Example:
+     * ```ts
+     * const buffer = Buffer.alloc(10);
+     * const field: SchemaFieldType = {
+     *     type: 'UInt8',
+     *     size: 1,
+     *     offset: 0,
+     *     isBits: false,
+     *     arraySize: 3
+     * };
+     * const values = [10, 20, 30];
+     * writeArrayField(buffer, field, values);
+     * console.log(buffer); // The buffer will have the values 10, 20, and 30 written at the specified offsets
+     * ```
+     *
+     * ## Notes:
+     * - If the provided array is smaller than the specified `arraySize`, the missing elements will be filled with `0`.
+     * - If the provided array is larger than the specified `arraySize`,
+     * only the elements up to the `arraySize` will be written.
+     *
+     * @param buffer - The buffer to write the field values into.
+     * @param field - The schema field that defines the type and size of the field to write.
+     * @param value - The array of values to write into the buffer.
+     * @throws {TypeError} If the value is not an array or if any element does not match the expected type.
+     */
+
+    private writeArrayField(buffer: Buffer, field: Required<SchemaFieldType>, value: unknown): void {
+        if (!Array.isArray(value)) {
+            throw new TypeError(`Expected an array for field "${ field.type }", but received ${ typeof value }`);
+        }
+
+        const isBigIntType = (<string> field.type).includes('Big');
+        const method = this.getBufferWriteMethod(buffer, field);
+
+        for (let i = 0; i < field.arraySize; i++) {
+            const elementValue = (<Array<unknown>> value)[i] || 0; // Use 0 for missing elements
+            this.validateFieldType(field, elementValue); // Validate each array element
+            const finalValue = isBigIntType
+                ? BigInt(<number> elementValue)
+                : <number> elementValue;
+
+            method.call(buffer, finalValue, field.offset + (i * field.size)); // Move the offset by field size per element
+        }
+    }
+
+    /**
+     * The `prepareValue` method converts the provided value to the appropriate type based on the field's type.
+     * If the field type includes 'Big', the value will be converted to a `BigInt`.
+     * Otherwise, it will be treated as a `number`.
+     *
+     * - **Input**:
+     *   - `field`: The schema field that defines the type of the value.
+     *   This is used to determine if the value should be converted to `BigInt`.
+     *   - `value`: The value to be converted, which can be either a `number` or a value to be interpreted as a `BigInt`.
+     *
+     * - **Output**: A `bigint` or `number`, depending on the field's type.
+     * If the field type includes 'Big' (e.g., `BigInt64LE`), the value is converted to a `BigInt`.
+     * Otherwise, it is returned as a `number`.
+     *
+     * ## Example:
+     * ```ts
+     * const field: SchemaFieldType = { type: 'BigInt64LE', size: 8, offset: 0, isBits: false };
+     * const value = 1234;
+     * const preparedValue = prepareValue(field, value);
+     * console.log(preparedValue); // Outputs: 1234n (BigInt)
+     *
+     * const field2: SchemaFieldType = { type: 'UInt32LE', size: 4, offset: 0, isBits: false };
+     * const value2 = 5678;
+     * const preparedValue2 = prepareValue(field2, value2);
+     * console.log(preparedValue2); // Outputs: 5678 (number)
+     * ```
+     */
+
+    private prepareValue(field: SchemaFieldType, value: unknown): bigint | number {
+        return (<string> field.type).includes('Big') ? BigInt(value as number) : value as number;
+    }
+
+    /**
      * The `writeField` method writes a value to the buffer according to its field type.
-     * It handles different types of values (e.g., strings, numbers, and BigInts) by calling the appropriate buffer write method.
+     * It handles different types of values (e.g., strings, numbers, BigInts) and supports arrays.
+     * If an array is provided, it validates the array length and writes each element, padding shorter arrays with 0s.
      *
      * - **Input**:
      *   - `buffer`: The buffer to which the field value will be written.
-     *   - `field`: The schema field containing information about the field's type, size, and offset.
-     *   - `value`: The value to be written into the buffer.
+     *   - `field`: The schema field containing information about the field's type, size, offset, and array size.
+     *   - `value`: The value to be written into the buffer, which can be a single value or an array of values.
      *
      * - **Error Handling**:
-     *   - Throws a `TypeError` if the value is not a valid `number` or `BigInt` for numeric fields.
-     *   - For string fields, it assumes the value is a valid string and writes it directly to the buffer.
+     *   - Throws a `TypeError`
+     *   if the value is not a valid type (e.g., string, number, or BigInt) based on the field type.
+     *   - If the field is an array, it ensures the value is an array and validates the array size.
      */
 
     private writeField(buffer: Buffer, field: SchemaFieldType, value: unknown): void {
+        if (field.arraySize) {
+            this.writeArrayField(buffer, <Required<SchemaFieldType>> field, value);
+
+            return;
+        }
+
         if (field.type === 'string') {
             if (typeof value !== 'string') {
                 throw new TypeError(`Expected a string for field "${ field.type }", but received ${ typeof value }`);
@@ -444,23 +649,10 @@ export class Struct {
             return;
         }
 
-        const isBigIntType = (<string> field.type).includes('Big');
-        if (isBigIntType && typeof value !== 'bigint') {
-            throw new TypeError(`Expected a BigInt for field "${ field.type }", but received ${ typeof value }`);
-        } else if (!isBigIntType && typeof value !== 'number') {
-            throw new TypeError(`Expected a number for field "${ field.type }", but received ${ typeof value }`);
-        }
+        this.validateFieldType(field, value);
+        const method = this.getBufferWriteMethod(buffer, field);
+        const finalValue = this.prepareValue(field, value);
 
-        const method = <(...args: Array<unknown>) => unknown> (
-            buffer[<keyof Buffer> ('write' + field.type)]
-        );
-
-        // Convert value to the correct type (BigInt or number)
-        const finalValue: bigint | number = isBigIntType
-            ? BigInt(value as number)
-            : value as number;
-
-        // Write the value to the buffer
         method.call(buffer, finalValue, field.offset);
     }
 
@@ -512,54 +704,94 @@ export class Struct {
     }
 
     /**
-     * The `readField` method reads a field from the given buffer based on its type and offset. It handles reading different
-     * types of fields, including strings and numeric types (e.g., `UInt8`, `Int8`, `UInt16`), and returns the corresponding
-     * value after decoding it from the buffer.
+     * The `readField` method reads a field (or array of fields) from the given buffer based on its type and offset.
+     * It handles reading different types of fields, including strings, numeric types (`UInt8`, `Int16BE`, etc.),
+     * and arrays of these types. The method decodes the field's value from the buffer and returns it.
      *
      * - **Input**:
      *   - `buffer`: A `Buffer` object containing the raw data.
-     *   - `field`: A `SchemaFieldType` object that defines the field's properties such as `offset`, `type`, and `size`.
+     *   - `field`: A `SchemaFieldType` object that defines the field's properties such as `offset`, `type`, `size`, and `arraySize`.
      *
      * - **Output**:
-     *   - The value of the field, which can be a `string`, `number`, or `bigint`, depending on the field's type.
+     *   - The value of the field, which can be a `string`, `number`, `bigint`, or an array of these types, depending on the field's properties.
      *
      * ## Example:
      *
+     * ### Reading a Single Field:
      * ```ts
      * const buffer = Buffer.alloc(8);
      * buffer.writeUInt8(123, 0);
-     * const field = { offset: 0, type: 'UInt8', size: 1 };
+     * const field = { offset: 0, type: 'UInt8', size: 1, isBits: false };
      * const value = readField(buffer, field);
      * console.log(value); // Expected Output: 123
+     * ```
      *
+     * ### Reading a String:
+     * ```ts
      * const stringBuffer = Buffer.from('Hello\x00\x00\x00');
-     * const stringField = { offset: 0, type: 'string', size: 5 };
+     * const stringField = { offset: 0, type: 'string', size: 5, isBits: false };
      * const stringValue = readField(stringBuffer, stringField);
      * console.log(stringValue); // Expected Output: 'Hello'
      * ```
      *
+     * ### Reading an Array:
+     * ```ts
+     * const arrayBuffer = Buffer.alloc(12);
+     * arrayBuffer.writeUInt8(1, 0);
+     * arrayBuffer.writeUInt8(2, 1);
+     * arrayBuffer.writeUInt8(3, 2);
+     * const arrayField = { offset: 0, type: 'UInt8', size: 1, arraySize: 3, isBits: false };
+     * const arrayValue = readField(arrayBuffer, arrayField);
+     * console.log(arrayValue); // Expected Output: [1, 2, 3]
+     * ```
+     *
      * ## Error Handling:
-     * - This method assumes the `field` object contains valid `offset`, `size`, and `type` properties, and the `buffer` is
-     *   large enough to accommodate the requested field.
-     * - If the type is unrecognized, this method will throw a runtime error due to the invalid `method` call.
+     * - Assumes the `field` object contains valid `offset`, `size`, `type`, and optionally `arraySize`.
+     * - Throws an error if the `buffer` does not have sufficient data for the specified field(s).
+     * - Throws an error if an invalid `field.type` is encountered.
      *
      * @param buffer - The `Buffer` object containing the data to be read.
-     * @param field - The `SchemaFieldType` object describing the field’s `offset`, `type`, and `size`.
-     * @returns The decoded value from the buffer as a `string`, `number`, or `bigint` based on the field type.
+     * @param field - The `SchemaFieldType` object describing the field's `offset`, `type`, `size`, and optionally `arraySize`.
+     * @returns The decoded value from the buffer as a `string`, `number`, `bigint`, or array based on the field type.
      */
 
-    private readField(buffer: Buffer, field: SchemaFieldType): number | bigint | string {
+    private readField(buffer: Buffer, field: SchemaFieldType): number | bigint | string | Array<number | bigint | string> {
         const byteOffset = field.offset;
 
-        // If the field is a string, we read it as a string from the buffer
+        // Handle string fields
         if (field.type === 'string') {
             return buffer.toString('utf8', byteOffset, byteOffset + field.size).replace(/\x00+$/, '');
         }
 
-        // For other types (UInt8, Int8, UInt16, etc.), use the corresponding Buffer method to read the value
+        // Get the Buffer read method for numeric fields
         const method = <(...args: Array<unknown>) => unknown> buffer[<keyof Buffer> ('read' + field.type)];
 
-        return <bigint | number> method.call(buffer, byteOffset, field.size);
+        if (!method) {
+            throw new TypeError(`No read method available for field type "${field.type}"`);
+        }
+
+        // Handle array fields
+        if (field.arraySize) {
+            const values: Array<number | bigint> = [];
+            const elementSize = field.size;
+            for (let i = 0; i < field.arraySize; i++) {
+                const offset = byteOffset + (i * elementSize);
+
+                // Ensure buffer has enough data
+                if (offset + elementSize > buffer.length) {
+                    throw new RangeError(`Insufficient buffer length to read array element at index ${i}`);
+                }
+
+                // Read the value at the current offset
+                const value = <number | bigint> method.call(buffer, offset);
+                values.push(value);
+            }
+
+            return values;
+        }
+
+        // Handle single numeric fields
+        return <number | bigint> method.call(buffer, byteOffset);
     }
 
     /**
@@ -613,10 +845,14 @@ export class Struct {
      *   - `'Int8'`, `'UInt8'` — 1 byte
      *   - `'Int16LE'`, `'Int16BE'`, `'UInt16LE'`, `'UInt16BE'` — 2 bytes
      *   - `'Int32LE'`, `'Int32BE'`, `'UInt32LE'`, `'UInt32BE'` — 4 bytes
-     *   - `'Int64LE'`, `'Int64BE'`, `'UInt64LE'`, `'UInt64BE'` — 8 bytes
+     *   - `'BigInt64LE'`, `'BigInt64BE'`, `'BigUInt64LE'`, `'BigUInt64BE'` — 8 bytes
      *
      * - **Output**: A `ParseFieldInterface` object with the corresponding `type`, `size` (in bytes),
-     * and `isBits` (set to `false`).
+     *   `isBits` (set to `false`), and an optional `arraySize` (the number of elements in the array, if applicable).
+     *
+     * - **Optional `arraySize`**: If provided, the field is considered an array,
+     * and `size` represents the size of each element in the array.
+     *   - If `arraySize` is not provided, the field is treated as a single element.
      *
      * ## Example:
      *
@@ -626,17 +862,21 @@ export class Struct {
      *
      * const field2 = parsePrimitiveField('UInt16LE');
      * console.log(field2); // { type: 'UInt16LE', size: 2, isBits: false }
+     *
+     * const field3 = parsePrimitiveField('Int32BE', 5);
+     * console.log(field3); // { type: 'Int32BE', size: 4, isBits: false, arraySize: 5 }
      * ```
      *
      * ## Error Handling:
      * - If the provided type is unsupported, the method throws a `TypeError`.
      *
      * @param type - The type of the field, which can be one of the supported primitive types.
+     * @param arraySize - An optional number representing the size of the array (defaults to `undefined` if not provided).
      * @returns A `ParseFieldInterface` object representing the field type and size in bytes, with `isBits` set to `false`.
      * @throws {TypeError} If the input type is unsupported.
      */
 
-    private parsePrimitiveField(type: PrimitiveType): ParseFieldInterface {
+    private parsePrimitiveField(type: PrimitiveType, arraySize?: number): ParseFieldInterface {
         const typeSizes: { [key in PrimitiveType]: number } = {
             'Int8': 1, 'UInt8': 1,
             'Int16LE': 2, 'Int16BE': 2, 'UInt16LE': 2, 'UInt16BE': 2,
@@ -645,28 +885,45 @@ export class Struct {
         };
 
         if (typeSizes[type]) {
-            return { type, size: typeSizes[type], isBits: false };
+            return { type, size: typeSizes[type], isBits: false, arraySize: arraySize };
         }
 
         throw new TypeError(`Unsupported primitive type: ${ type }`);
     }
 
     /**
-     * The `parseField` method parses a given field, determining whether it's a string type or an object
+     * The `parseField` method parses a given field, determining whether it's a string type, an object, or a bit field,
      * and returns a `ParseFieldInterface` object. It will call the appropriate parsing function based on
-     * whether the field is a bit field or a primitive type.
+     * whether the field is a primitive type or a bit field.
      *
-     * - **Input**: A `FieldInterface` or string that represents the field type.
-     * - **Output**: A `ParseFieldInterface` object with the parsed field details (type, size, isBit).
+     * - **Input**: A `FieldInterface`, `string`, or `Struct` that represents the field type.
+     *   - If the input is a **string**, it can represent either a primitive type (e.g., `'Int8'`) or a bit field (e.g., `'UInt8:4'`).
+     *   - If the input is an **object** of type `Struct`, the method returns the field based on the structure's properties.
+     * - **Output**: A `ParseFieldInterface` object with the parsed field details, including:
+     *   - `type`: The field type (e.g., `'Int8'`, `'UInt8'`).
+     *   - `size`: The size of the field in bytes.
+     *   - `isBits`: A boolean indicating if the field is a bit field (`true`) or not (`false`).
+     *   - `arraySize`: (Optional) The number of elements in an array if the field type includes an array format (e.g., `'string[10]'`).
      *
      * ## Example:
+     *
      * ```ts
-     * const fieldObject = parseField('Int8'); // Returns { type: 'Int8', size: 1, isBit: false }
-     * const fieldObject2 = parseField('UInt8:4'); // Returns { type: 'UInt8', size: 4, isBit: true }
+     * const fieldObject = parseField('Int8');
+     * console.log(fieldObject); // Returns { type: 'Int8', size: 1, isBits: false }
+     *
+     * const fieldObject2 = parseField('UInt8:4');
+     * console.log(fieldObject2); // Returns { type: 'UInt8', size: 4, isBits: true }
+     *
+     * const fieldObject3 = parseField('string[10]');
+     * console.log(fieldObject3); // Returns { type: 'string', size: 10, isBits: false, arraySize: 10 }
      * ```
      *
-     * @param field - The field to parse, which could be a string or an object.
+     * ## Error Handling:
+     * - If the provided field format is invalid or unsupported, the method may throw an error (e.g., invalid type or format).
+     *
+     * @param field - The field to parse, which could be a string or an object. A string can represent a primitive type or a bit field, and an object could be a `Struct`.
      * @returns A `ParseFieldInterface` object representing the parsed field.
+     * @throws {Error} If the input format is invalid or unsupported.
      */
 
     private parseField(field: FieldInterface | string | Struct): ParseFieldInterface {
@@ -675,9 +932,17 @@ export class Struct {
         }
 
         if (typeof field === 'string') {
-            return field.includes(':')
-                ? this.parseBitField(field as BitSizeType)
-                : this.parsePrimitiveField(field as PrimitiveType);
+            if (field.includes(':')) {
+                return this.parseBitField(field as BitSizeType);
+            }
+
+            const pattern = /^([a-z0-9]+)\[(\d+)\]$/i;
+            const match = field.match(pattern);
+            if (match) {
+                return this.parsePrimitiveField(match[1] as PrimitiveType, parseInt(match[2], 10));
+            }
+
+            return this.parsePrimitiveField(field as PrimitiveType);
         }
 
         return field;
@@ -807,6 +1072,12 @@ export class Struct {
                 };
 
                 accumulator.bits = 0;
+                if (fieldObject.arraySize) {
+                    this.schema[fieldName].arraySize = fieldObject.arraySize;
+                    accumulator.bytes += fieldObject.size * fieldObject.arraySize;
+                    continue;
+                }
+
                 accumulator.bytes += fieldObject.size;
                 continue;
             }

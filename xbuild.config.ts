@@ -27,7 +27,7 @@ const config: Array<xBuildConfig> = [
             platform: 'node',
             packages: 'external',
             sourcemap: true,
-            sourceRoot: `https://github.com/remotex-lab/xstruct/tree/v${ pkg.version }/`,
+            sourceRoot: `https://github.com/remotex-lab/xStruct/tree/v${ pkg.version }/`,
             entryPoints: [ 'src/index.ts' ]
         }
     },

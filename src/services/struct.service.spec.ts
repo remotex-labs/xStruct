@@ -812,3 +812,117 @@ describe('Struct - Nested Struct Support', () => {
         expect(buffer).toEqual(Buffer.from([ 42, 0, 0x02, 0x01 ]));
     });
 });
+
+describe('Struct - Array Support', () => {
+    let struct: Struct;
+
+    test('should correctly handle Int16LE[8] serialization and deserialization', () => {
+        struct = new Struct({
+            int16Array: 'Int16LE[8]' // Array of 8 Int16LE values
+        });
+
+        const data = {
+            int16Array: [ 0x1234, 0x5678, 0x3411, 0x1EF0, 0x1111, 0x2222, 0x3333, 0x4444 ]
+        };
+
+        const buffer = struct.toBuffer(data);
+        const result = struct.toObject<{ int16Array: number[] }>(buffer);
+
+        // Validate serialized buffer
+        expect(buffer).toEqual(
+            Buffer.from([
+                0x34, 0x12, 0x78, 0x56, 0x11, 0x34, 0xF0, 0x1E,
+                0x11, 0x11, 0x22, 0x22, 0x33, 0x33, 0x44, 0x44
+            ])
+        );
+
+        // Validate deserialized array
+        expect(result.int16Array).toEqual(data.int16Array);
+    });
+
+    test('should correctly handle BigUInt64BE[12] serialization and deserialization', () => {
+        struct = new Struct({
+            bigUintArray: 'BigUInt64BE[12]' // Array of 12 BigUInt64BE values
+        });
+
+        const data = {
+            bigUintArray: Array.from({ length: 12 }, (_, i) => BigInt(i + 1)) // [1n, 2n, ..., 12n]
+        };
+
+        const buffer = struct.toBuffer(data);
+        const result = struct.toObject<{ bigUintArray: bigint[] }>(buffer);
+
+        // Validate serialized buffer
+        expect(buffer).toEqual(
+            Buffer.from([
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, // 1n
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, // 2n
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, // 3n
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, // 4n
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x05, // 5n
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06, // 6n
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x07, // 7n
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, // 8n
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x09, // 9n
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0A, // 10n
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0B, // 11n
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C  // 12n
+            ])
+        );
+
+        // Validate deserialized array
+        expect(result.bigUintArray).toEqual(data.bigUintArray);
+    });
+
+    test('should throw an error if array contain an different type', () => {
+        struct = new Struct({
+            int16Array: 'Int16LE[4]' // Array of 4 Int16LE values
+        });
+
+        const data = {
+            int16Array: [ 0x1234, 0x5678, 0x1ABC, '0x1EF0', 0x1111 ] // Exceeds 4 elements
+        };
+
+        // Ensure serialization throws an error
+        expect(() => struct.toBuffer(data))
+            .toThrow('Expected a number for field "Int16LE", but received string');
+    });
+
+    test('should correctly handle nested Structs with arrays', () => {
+        const nestedStruct = new Struct({
+            arrayField: 'UInt8[3]', // Array of 3 UInt8 values
+            anotherField: 'UInt16LE'
+        });
+
+        const parentStruct = new Struct({
+            parentField1: 'UInt8',
+            nestedStructField: nestedStruct,
+            parentField2: 'UInt32BE'
+        });
+
+        const data = {
+            parentField1: 42,
+            nestedStructField: {
+                arrayField: [ 1, 2, 3 ],
+                anotherField: 258 // 0x0102 in LE
+            },
+            parentField2: 16909060 // 0x01020304 in BE
+        };
+
+        const buffer = parentStruct.toBuffer(data);
+        const result = parentStruct.toObject(buffer);
+
+        // Validate serialized buffer
+        expect(buffer).toEqual(
+            Buffer.from([
+                42,                // parentField1 (UInt8)
+                1, 2, 3,           // arrayField (UInt8[3])
+                0x02, 0x01,        // anotherField (UInt16LE -> 0x0102)
+                0x01, 0x02, 0x03, 0x04 // parentField2 (UInt32BE -> 0x01020304)
+            ])
+        );
+
+        // Validate deserialized object
+        expect(result).toEqual(data);
+    });
+});
