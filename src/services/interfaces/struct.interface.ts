@@ -34,6 +34,34 @@ type BitSizeUIntType = `UInt8:${ 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 }`;
 export type BitSizeType = BitSizeIntType | BitSizeUIntType;
 
 /**
+ * The `WriteMethodType` is a type alias for a function that represents a write method for buffer operations.
+ * This type is used to define the signature of functions that write data to a buffer, where the arguments
+ * can be of any type, and the return value can also be of any type.
+ *
+ * The function takes an arbitrary number of arguments (`...args`),
+ * allowing for flexible usage in various write operations.
+ * The return value is unknown, as it depends on the specific implementation of the write method.
+ *
+ * ## Example:
+ *
+ * ```ts
+ * const writeUInt8: WriteMethodType = (value, offset) => {
+ *     buffer.writeUInt8(value, offset);
+ * };
+ *
+ * const writeInt16: WriteMethodType = (value, offset) => {
+ *     buffer.writeInt16LE(value, offset);
+ * };
+ * ```
+ *
+ * ## Usage:
+ * This type is commonly used in cases where you need to invoke specific buffer methods dynamically,
+ * for example, when writing different types of data (e.g., integers, strings, etc.) to a buffer.
+ */
+
+export type WriteMethodType = (...args: Array<unknown>) => unknown;
+
+/**
  * The `PrimitiveType` type defines the various primitive data types used for structuring fields in a binary layout.
  * These types represent different integer sizes, both signed and unsigned, along with their associated endianness (byte order).
  *
