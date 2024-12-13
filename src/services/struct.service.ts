@@ -210,7 +210,7 @@ export class Struct<T extends object = object> {
      * @returns A new object of type `T` with values extracted from the buffer based on the schema.
      */
 
-    toObject(buffer: Buffer): T {
+    toObject(buffer: Buffer): Required<T> {
         const result: Record<string, unknown> = {};
         for (const fieldName in this.schema) {
             const field = this.schema[fieldName];
@@ -224,7 +224,7 @@ export class Struct<T extends object = object> {
             }
         }
 
-        return result as T;
+        return result as Required<T>;
     }
 
     /**
