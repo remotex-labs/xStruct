@@ -13,7 +13,7 @@ import type {
     WriteMethodType
 } from '@services/interfaces/struct.interface';
 
-export class Struct {
+export class Struct<T extends object = object> {
     /**
      * The `size` property represents the total size of the struct in bytes.
      * This value is calculated by summing the sizes of all fields in the struct,
@@ -140,7 +140,7 @@ export class Struct {
      * @returns A `Buffer` containing the serialized binary data of the object.
      */
 
-    toBuffer<T extends object>(data: T): Buffer {
+    toBuffer(data: T): Buffer {
         const buffer = Buffer.alloc(this.size);
         if (!data || typeof data !== 'object') {
             throw new Error(`Expected an object of fields, but received ${ typeof data }`);
@@ -210,7 +210,7 @@ export class Struct {
      * @returns A new object of type `T` with values extracted from the buffer based on the schema.
      */
 
-    toObject<T extends object>(buffer: Buffer): T {
+    toObject(buffer: Buffer): T {
         const result: Record<string, unknown> = {};
         for (const fieldName in this.schema) {
             const field = this.schema[fieldName];
