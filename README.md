@@ -386,6 +386,9 @@ Deserialized Network Packet Data: { header: 255, flags: 3, connection: { ip: 8, 
 These field types provide precise control over the size and byte order of data when defining the schema for your structs, enabling you to correctly handle binary serialization, networking protocols, or low-level data manipulation.
 
 ### Methods
+#### Class: `Struct`<T extends object = object>
+- **`toObject(buffer: Buffer): T`**  
+  Deserializes a buffer into an object of type `T` based on the struct schema.
 
-- `toObject<T extends object>(buffer: Buffer): T`: Deserializes a buffer into an object of type `T` based on the struct schema.
-- `toBuffer<T extends object>(data: T): Buffer`: Serializes an object of type `T` into a buffer based on the struct schema.
+- **`toBuffer(data: T): Buffer`**  
+  Serializes an object of type `T` into a buffer based on the struct schema.
