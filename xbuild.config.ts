@@ -17,7 +17,7 @@ import pkg from './package.json' with { type: 'json' };
 
 const config: Array<xBuildConfig> = [
     {
-        declaration: true,
+        bundleDeclaration: true,
         esbuild: {
             bundle: true,
             minify: true,
@@ -32,7 +32,7 @@ const config: Array<xBuildConfig> = [
         }
     },
     {
-        declaration: false,
+        bundleDeclaration: false,
         noTypeChecker: true,
         esbuild: {
             bundle: true,
