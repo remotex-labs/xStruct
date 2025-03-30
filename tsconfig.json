@@ -24,6 +24,9 @@
             "node"
         ],
         "paths": {
+            "@components/*": [
+                "./components/*"
+            ],
             "@services/*": [
                 "./services/*"
             ]
