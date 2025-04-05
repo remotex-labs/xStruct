@@ -2,7 +2,7 @@
  * Exports Types
  */
 
-export type * from '@services/interfaces/struct.interface';
+export type * from '@services/interfaces/struct-service.interface';
 
 /**
  * Exports

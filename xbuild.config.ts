@@ -17,7 +17,7 @@ import pkg from './package.json' with { type: 'json' };
 
 const config: Array<xBuildConfig> = [
     {
-        declaration: true,
+        bundleDeclaration: true,
         esbuild: {
             bundle: true,
             minify: true,
@@ -28,11 +28,13 @@ const config: Array<xBuildConfig> = [
             packages: 'external',
             sourcemap: true,
             sourceRoot: `https://github.com/remotex-lab/xStruct/tree/v${ pkg.version }/`,
-            entryPoints: [ 'src/index.ts' ]
+            entryPoints: {
+                'index': 'src/index.ts'
+            }
         }
     },
     {
-        declaration: false,
+        bundleDeclaration: false,
         noTypeChecker: true,
         esbuild: {
             bundle: true,
