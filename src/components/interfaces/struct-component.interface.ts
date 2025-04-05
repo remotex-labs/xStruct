@@ -3,7 +3,7 @@
  */
 
 import type { Struct } from '@services/struct.service';
-import type { ContextInterface } from '@services/interfaces/struct.interface';
+import type { ContextInterface } from '@services/interfaces/struct-service.interface';
 import type { PositionedDescriptorInterface } from '@components/interfaces/primitive-component.interface';
 
 /**
