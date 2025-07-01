@@ -65,7 +65,7 @@
         "eslint-plugin-tsdoc": "^0.4.0",
         "@swc/jest": "^0.2.36",
         "@types/jest": "^29.5.14",
-        "@types/node": "^22.14.0",
+        "@types/node": "^24.0.8",
         "@remotex-labs/xbuild": "^1.5.6"
     }
 }
