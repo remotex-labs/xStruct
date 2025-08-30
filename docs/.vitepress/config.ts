@@ -39,7 +39,10 @@ export default defineVersionedConfig({
 
         nav: [
             { text: 'Home', link: '/' },
-            { text: 'GitHub', link: 'https://github.com/remotex-labs/xStruct' }
+            { text: 'GitHub', link: 'https://github.com/remotex-labs/xStruct' },
+            {
+                component: 'VersionSwitcher'
+            }
         ],
 
         socialLinks: [
