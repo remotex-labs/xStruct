@@ -1,9 +1,28 @@
-# xStruct
-[![npm version](https://img.shields.io/badge/Documentation-orange?logo=typescript&logoColor=f5f5f5)](https://remotex-labs.github.io/xStruct/)
-[![npm version](https://img.shields.io/npm/v/@remotex-labs/xstruct.svg)](https://www.npmjs.com/package/@remotex-labs/xstruct)
-[![License: MPL 2.0](https://img.shields.io/badge/License-MPL_2.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0)
-[![Node.js CI](https://github.com/remotex-labs/xStruct/actions/workflows/node.js.yml/badge.svg)](https://github.com/remotex-labs/xnasi/actions/workflows/node.js.yml)
+---
+layout: home
+hero:
+  name: XStruct
+  text: Binary Serialization Library for TypeScript
+  tagline: A compact (10kb) TypeScript library for defining, serializing, and deserializing binary data structures
+  actions:
+    - theme: brand
+      text: Get Started
+      link: /guide/
+    - theme: alt
+      text: View on GitHub
+      link: https://github.com/remotex-labs/xstruct
+features:
+  - title: Lightweight
+    details: Only 10kb, optimized for both CommonJS and ESM
+  - title: Powerful
+    details: Handle complex binary structures with minimal code
+  - title: Type-safe
+    details: Full TypeScript support with interface validation
+  - title: Flexible
+    details: Support for primitive types, strings, arrays, and nested structures
+---
 
+# xStruct
 A compact (10kb) TypeScript library for defining, serializing, and deserializing binary data structures with support for primitive types, bitfields, arrays, and nested structures.
 
 This library provides a simple way to define and serialize data structures (structs) with support for both regular fields and bitfields.  
@@ -140,8 +159,8 @@ const nullTermStruct = new Struct({
 });
 ```
 
-> **Note**: When writing strings, use the `nullTerminated` option with `maxLength` to limit string length during serialization only. 
-> This doesn't affect the buffer size calculation or reading. 
+> **Note**: When writing strings, use the `nullTerminated` option with `maxLength` to limit string length during serialization only.
+> This doesn't affect the buffer size calculation or reading.
 > If a null terminator is not found within the specified `maxLength` when reading, an error will be thrown.
 
 
@@ -207,22 +226,3 @@ const shape: Shape = {
   ]
 };
 ```
-
-## Documentation
-For complete API documentation, examples, and guides, visit: [xStruct Documentation](https://remotex-labs.github.io/xStruct/)
-
-## Compatibility
-- Node.js 20+
-- All modern browsers (via bundlers)
-- TypeScript 4.5+
-
-## Contributing
-Contributions are welcome!\
-Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-
-## License
-This project is licensed under the Mozilla Public License 2.0 - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-- Built with TypeScript

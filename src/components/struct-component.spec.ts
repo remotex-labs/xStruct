@@ -2,6 +2,7 @@
  * Imports
  */
 
+import { Struct } from '@services/struct.service';
 import {
     readSingleStruct,
     readStruct,
@@ -9,7 +10,6 @@ import {
     writeSingleStruct, writeStruct,
     writeStructArray
 } from '@components/struct.component';
-import { Struct } from '@services/struct.service';
 
 /**
  * Tests
@@ -782,7 +782,7 @@ describe('writeStruct', () => {
 
     test('should use first array element when descriptor has no arraySize but value is array', () => {
         const context: any = {
-            buffer:  Buffer.alloc(12),
+            buffer: Buffer.alloc(12),
             offset: 0,
             descriptor: {
                 position: 4,

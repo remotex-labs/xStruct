@@ -2,12 +2,12 @@
  * Import will remove at compile time
  */
 
+import type { PrimitiveType } from '@components/interfaces/primitive-component.interface';
 import type {
     BitfieldContextInterface,
     BitfieldDescriptorInterface,
     PositionedBitfieldDescriptorType
 } from '@components/interfaces/bitfield-component.interface';
-import type { PrimitiveType } from '@components/interfaces/primitive-component.interface';
 
 /**
  * Imports

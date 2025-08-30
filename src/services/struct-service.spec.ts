@@ -861,7 +861,7 @@ describe('Struct toBuffer with Bitfield fields', () => {
             field2: 5
         };
 
-        expect(() => struct.toBuffer(data)).toThrowError(
+        expect(() => struct.toBuffer(data)).toThrow(
             'Value 16 does not fit within 4 bits for type UInt8'
         );
     });
@@ -893,7 +893,7 @@ describe('Struct toBuffer with Bitfield fields', () => {
             field1: -1  // Invalid negative value for an unsigned 4-bit field
         };
 
-        expect(() => struct.toBuffer(data)).toThrowError(
+        expect(() => struct.toBuffer(data)).toThrow(
             'Value -1 does not fit within 4 bits for type UInt8'
         );
     });
@@ -904,7 +904,7 @@ describe('Struct toBuffer with Bitfield fields', () => {
                 // @ts-expect-error test invalided type
                 field1: 'test:4'  // 4-bit unsigned field
             });
-        }).toThrowError(
+        }).toThrow(
             'test is not supported'
         );
     });
@@ -931,7 +931,7 @@ describe('Struct toBuffer with Bitfield fields', () => {
             field1: 8  // Invalid value for a signed 4-bit integer (max is 8 for 4 bits signed)
         };
 
-        expect(() => struct.toBuffer(data)).toThrowError(
+        expect(() => struct.toBuffer(data)).toThrow(
             'Value 8 does not fit within 4 bits for type Int8'
         );
     });
@@ -1236,7 +1236,7 @@ describe('Struct - toBuffer for all types', () => {
                 // @ts-expect-error test invalided type
                 field1: 'UInt320LE'  // 4-bit unsigned field
             });
-        }).toThrowError(
+        }).toThrow(
             'Invalid primitive type: UInt320LE'
         );
     });
