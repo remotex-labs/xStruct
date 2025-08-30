@@ -2,29 +2,18 @@
  * Import will remove at compile time
  */
 
-import type {
-    BitfieldDescriptorInterface,
-    PositionedBitfieldDescriptorType
-} from '@components/interfaces/bitfield-component.interface';
+import type { BitfieldDescriptorInterface } from '@components/interfaces/bitfield-component.interface';
+import type { PositionedBitfieldDescriptorType } from '@components/interfaces/bitfield-component.interface';
 
 /**
  * Imports
  */
 
-import {
-    maskCache,
-    getBitMask,
-    readBitfield,
-    isSignedType,
-    writeBitfield,
-    extractBitfieldValue,
-    composeBitfieldValue,
-    validateBitFieldBounds,
-    parseBitfieldDescriptor,
-    processValueForBitfield,
-    validateBitfieldParameters
-} from '@components/bitfield.component';
 import { PRIMITIVE_TYPE_SIZES } from '@components/primitive.component';
+import { validateBitFieldBounds, parseBitfieldDescriptor } from '@components/bitfield.component';
+import { maskCache, getBitMask, readBitfield, isSignedType } from '@components/bitfield.component';
+import { processValueForBitfield, validateBitfieldParameters } from '@components/bitfield.component';
+import { writeBitfield, extractBitfieldValue, composeBitfieldValue } from '@components/bitfield.component';
 
 /**
  * Tests
@@ -1099,7 +1088,7 @@ describe('parseBitfieldDescriptor', () => {
         });
 
         test('should parse correctly with max allowed bit position', () => {
-            const result = parseBitfieldDescriptor('Int32BE:1', 0 ,30);
+            const result = parseBitfieldDescriptor('Int32BE:1', 0, 30);
 
             expect(result).toEqual({
                 kind: 'bitfield',

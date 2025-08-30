@@ -33,7 +33,7 @@ import type { ReadMethodType, WriteMethodType } from '@components/interfaces/buf
  */
 
 export function getBufferMethod<T>(buffer: Buffer, operation: 'read' | 'write', type: string): T {
-    const methodName = `${operation}${type}` as keyof Buffer;
+    const methodName = `${ operation }${ type }` as keyof Buffer;
     const method = <WriteMethodType<number>> buffer[methodName];
 
     if (!type)

@@ -2,11 +2,9 @@
  * Import will remove at compile time
  */
 
-import type {
-    PrimitiveType,
-    PositionedDescriptorInterface
-} from '@components/interfaces/primitive-component.interface';
 import type { ContextInterface } from '@services/interfaces/struct-service.interface';
+import type { PrimitiveType } from '@components/interfaces/primitive-component.interface';
+import type { PositionedDescriptorInterface } from '@components/interfaces/primitive-component.interface';
 
 /**
  * Creates a union type of numbers from 0 to N-1
@@ -104,20 +102,20 @@ export type RangeType<Start extends number, End extends number> = Exclude<
  * @since 2.0.0
  */
 
-type SignedBitField8 = `Int8:${ RangeType<1, 8> }`;
-type UnsignedBitField8 = `UInt8:${ RangeType<1, 8> }`;
-type SignedBitField16LE = `Int16LE:${ RangeType<1, 16> }`;
-type SignedBitField16BE = `Int16BE:${ RangeType<1, 16> }`;
-type UnsignedBitField16LE = `UInt16LE:${ RangeType<1, 16> }`;
-type UnsignedBitField16BE = `UInt16BE:${ RangeType<1, 16> }`;
+type SignedBitField8Type = `Int8:${ RangeType<1, 8> }`;
+type UnsignedBitField8Type = `UInt8:${ RangeType<1, 8> }`;
+type SignedBitField16LEType = `Int16LE:${ RangeType<1, 16> }`;
+type SignedBitField16BEType = `Int16BE:${ RangeType<1, 16> }`;
+type UnsignedBitField16LEType = `UInt16LE:${ RangeType<1, 16> }`;
+type UnsignedBitField16BEType = `UInt16BE:${ RangeType<1, 16> }`;
 
 export type BitFieldType =
-    | SignedBitField8
-    | SignedBitField16LE
-    | SignedBitField16BE
-    | UnsignedBitField8
-    | UnsignedBitField16LE
-    | UnsignedBitField16BE;
+    | SignedBitField8Type
+    | SignedBitField16LEType
+    | SignedBitField16BEType
+    | UnsignedBitField8Type
+    | UnsignedBitField16LEType
+    | UnsignedBitField16BEType;
 
 /**
  * Interface representing a bit field descriptor within a binary data structure

@@ -2,34 +2,18 @@
  * Import will remove at compile time
  */
 
-import type {
-    BitFieldType,
-    BitfieldDescriptorInterface,
-    PositionedBitfieldDescriptorType
-} from '@components/interfaces/bitfield-component.interface';
-
-import type {
-    StringType,
-    StringArrayType,
-    StringDescriptorType,
-    PositionedStringDescriptorType
-} from '@components/interfaces/string-component.interface';
-
-import type {
-    PrimitiveType,
-    FloatPrimitiveType,
-    PrimitiveArrayType,
-    PositionedPrimitiveDescriptorType
-} from '@components/interfaces/primitive-component.interface';
-
-import type {
-    StructDescriptorInterface,
-    PositionedStructDescriptorType
-} from '@components/interfaces/struct-component.interface';
-
-import type {
-    Struct
-} from '@services/struct.service';
+import type { Struct } from '@services/struct.service';
+import type { BitFieldType } from '@components/interfaces/bitfield-component.interface';
+import type { StringDescriptorType } from '@components/interfaces/string-component.interface';
+import type { PrimitiveArrayType } from '@components/interfaces/primitive-component.interface';
+import type { StructDescriptorInterface } from '@components/interfaces/struct-component.interface';
+import type { StringType, StringArrayType } from '@components/interfaces/string-component.interface';
+import type { BitfieldDescriptorInterface } from '@components/interfaces/bitfield-component.interface';
+import type { PositionedStringDescriptorType } from '@components/interfaces/string-component.interface';
+import type { PositionedStructDescriptorType } from '@components/interfaces/struct-component.interface';
+import type { PositionedBitfieldDescriptorType } from '@components/interfaces/bitfield-component.interface';
+import type { PrimitiveType, FloatPrimitiveType } from '@components/interfaces/primitive-component.interface';
+import type { PositionedPrimitiveDescriptorType } from '@components/interfaces/primitive-component.interface';
 
 /**
  * Represents the various string format specifications that can be used in field definitions

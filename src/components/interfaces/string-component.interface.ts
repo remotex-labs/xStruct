@@ -2,11 +2,11 @@
  * Import will remove at compile time
  */
 
+import type { ContextInterface } from '@services/interfaces/struct-service.interface';
 import type {
     UnsignedPrimitiveType,
     PositionedDescriptorInterface
 } from '@components/interfaces/primitive-component.interface';
-import type { ContextInterface } from '@services/interfaces/struct-service.interface';
 
 /**
  * Defines the supported string encoding types for data structures

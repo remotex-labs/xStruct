@@ -3,12 +3,14 @@
  */
 
 import type {
-    StringType,
-    StringDataType,
-    StringContextInterface,
-    PositionedStringDescriptorType,
-    LengthPrefixedDescriptorInterface
-} from '@components/interfaces/string-component.interface';
+    StructDataType,
+    StructContextInterface
+} from '@components/interfaces/struct-component.interface';
+
+import type {
+    BitfieldContextInterface,
+    PositionedBitfieldDescriptorType
+} from '@components/interfaces/bitfield-component.interface';
 
 import type {
     PrimitiveType,
@@ -16,6 +18,14 @@ import type {
     PrimitiveContextInterface,
     PositionedDescriptorInterface
 } from '@components/interfaces/primitive-component.interface';
+
+import type {
+    StringType,
+    StringDataType,
+    StringContextInterface,
+    PositionedStringDescriptorType,
+    LengthPrefixedDescriptorInterface
+} from '@components/interfaces/string-component.interface';
 
 import type {
     FieldsType,
@@ -26,16 +36,6 @@ import type {
     StructSchemaInterface,
     PositionedDescriptorFieldType
 } from '@services/interfaces/struct-service.interface';
-
-import type {
-    BitfieldContextInterface,
-    PositionedBitfieldDescriptorType
-} from '@components/interfaces/bitfield-component.interface';
-
-import type {
-    StructDataType,
-    StructContextInterface
-} from '@components/interfaces/struct-component.interface';
 
 /**
  * Implementation imports
@@ -296,7 +296,7 @@ export class Struct<T extends object = object> {
         if ('lengthType' in field && field.lengthType) {
             const primitiveSize = PRIMITIVE_TYPE_SIZES[field.lengthType as PrimitiveType];
             if (!primitiveSize) {
-                throw new Error(`Invalid length type: ${field.lengthType}`);
+                throw new Error(`Invalid length type: ${ field.lengthType }`);
             }
 
             positionedDescriptor.size = primitiveSize / 8;

@@ -370,7 +370,7 @@ export function writeSingleString(this: StringContextInterface, value: string, a
         if('maxLength' in this.descriptor && this.descriptor.maxLength)
             value = value.length > this.descriptor.maxLength ? value.slice(0, this.descriptor.maxLength) : value;
 
-        const nullTerminatedString = value.endsWith('\0') ? value : `${value}\0`;
+        const nullTerminatedString = value.endsWith('\0') ? value : `${ value }\0`;
         const stringBuffer = Buffer.from(nullTerminatedString, encoding);
         const [ start, end ] = splitBufferWithGap(this.buffer, absolutePosition, size);
 
