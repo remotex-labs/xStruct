@@ -1,4 +1,8 @@
-# XStruct Binary Serialization Library
+# xStruct
+[![npm version](https://img.shields.io/badge/Documentation-orange?logo=typescript&logoColor=f5f5f5)](https://remotex-labs.github.io/xStruct/)
+[![npm version](https://img.shields.io/npm/v/@remotex-labs/xstruct.svg)](https://www.npmjs.com/package/@remotex-labs/xstruct)
+[![License: MPL 2.0](https://img.shields.io/badge/License-MPL_2.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0)
+[![Node.js CI](https://github.com/remotex-labs/xStruct/actions/workflows/node.js.yml/badge.svg)](https://github.com/remotex-labs/xnasi/actions/workflows/node.js.yml)
 
 A compact (10kb) TypeScript library for defining, serializing, and deserializing binary data structures with support for primitive types, bitfields, arrays, and nested structures.
 
@@ -203,3 +207,22 @@ const shape: Shape = {
   ]
 };
 ```
+
+## Documentation
+For complete API documentation, examples, and guides, visit: [xStruct Documentation](https://remotex-labs.github.io/xStruct/)
+
+## Compatibility
+- Node.js 20+
+- All modern browsers (via bundlers)
+- TypeScript 4.5+
+
+## Contributing
+Contributions are welcome!\
+Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+
+## License
+This project is licensed under the Mozilla Public License 2.0 - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+- Built with TypeScript
