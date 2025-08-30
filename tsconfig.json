@@ -3,16 +3,16 @@
         "strict": true,
         "target": "ESNext",
         "module": "ESNext",
-        "baseUrl": "./src",
+        "baseUrl": ".",
         "outDir": "dist",
-        "rootDir": ".",
+        "rootDir": "src",
         "declaration": true,
         "skipLibCheck": true,
-        "importHelpers": true,
+        "importHelpers": false,
         "isolatedModules": false,
         "esModuleInterop": false,
         "moduleDetection": "force",
-        "moduleResolution": "node",
+        "moduleResolution": "bundler",
         "resolveJsonModule": true,
         "allowSyntheticDefaultImports": true,
         "forceConsistentCasingInFileNames": true,
@@ -25,13 +25,16 @@
         ],
         "paths": {
             "@components/*": [
-                "./components/*"
+                "src/components/*"
             ],
             "@services/*": [
-                "./services/*"
+                "src/services/*"
             ]
         }
     },
+    "include": [
+        "src/index.ts"
+    ],
     "exclude": [
         "dist",
         "node_modules",
