@@ -8,7 +8,7 @@
     "version": "v1.0.0-local",
     "license": "Mozilla Public License Version 2.0",
     "description": "This library provides a simple way to define and serialize data structures (structs) with support for both regular fields and bitfields",
-    "homepage": "https://github.com/remotex-lab/xStruct",
+    "homepage": "https://remotex-labs.github.io/xStruct",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/remotex-lab/xStruct.git"
