@@ -56,7 +56,10 @@
         "lint": "xbuild --tc && eslint . -c ./eslint.config.mjs",
         "ci:test": "jest",
         "ci:clean": "rm -rf ./dist",
-        "ci:build": "npm run build"
+        "ci:build": "npm run build",
+        "docs:dev": "vitepress dev docs",
+        "docs:build": "vitepress build docs",
+        "docs:preview": "vitepress preview docs"
     },
     "devDependencies": {
         "jest": "^30.1.1",
