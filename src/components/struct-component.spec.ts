@@ -18,12 +18,12 @@ import {
 describe('readSingleStruct', () => {
     // Mock for StructType and required interfaces
     const mockStructType = {
-        toObject: jest.fn()
+        toObject: xJet.fn<any, any, any>()
     };
 
     // Mock buffer and subarray function
     const mockBuffer = {
-        subarray: jest.fn()
+        subarray: xJet.fn()
     };
 
     // Setup test context
@@ -31,7 +31,7 @@ describe('readSingleStruct', () => {
 
     beforeEach(() => {
         // Reset mocks
-        jest.clearAllMocks();
+        xJet.clearAllMocks();
 
         // Setup a fresh context for each test
         context = {
@@ -223,20 +223,24 @@ describe('readStructArray', () => {
 
 describe('readStruct', () => {
     // Define test structures using proper primitive types from interface
-    const PersonStruct = new Struct({
-        id: 'UInt32LE',
-        name: { type: 'string', size: 20 }
-    });
-
-    const AddressStruct = new Struct({
-        street: { type: 'string', size: 30 },
-        zipCode: 'UInt16LE'
-    });
+    let PersonStruct: Struct;
+    let AddressStruct: Struct;
 
     // Test buffer with encoded data
     let buffer: Buffer;
 
     beforeEach(() => {
+        // Create fresh struct instances for each test to avoid spy contamination
+        PersonStruct = new Struct({
+            id: 'UInt32LE',
+            name: { type: 'string', size: 20 }
+        });
+
+        AddressStruct = new Struct({
+            street: { type: 'string', size: 30 },
+            zipCode: 'UInt16LE'
+        });
+
         // Create a test buffer - using Uint8Array as that's what the interface uses
         buffer = Buffer.alloc(256);
 
@@ -260,7 +264,7 @@ describe('readStruct', () => {
         };
 
         // Mock the readSingleStruct behavior for this test case
-        PersonStruct.toObject = jest.fn().mockReturnValue({
+        xJet.spyOn(PersonStruct, 'toObject').mockReturnValue({
             id: 42,
             name: 'John Doe'
         });
@@ -292,7 +296,7 @@ describe('readStruct', () => {
 
         // Setup the mock to return different values for each array element
         let callCount = 0;
-        PersonStruct.toObject = jest.fn().mockImplementation(() => {
+        xJet.spyOn(PersonStruct, 'toObject').mockImplementation(() => {
             callCount++;
             if (callCount === 1) return { id: 101, name: 'Alice' };
             if (callCount === 2) return { id: 102, name: 'Bob' };
@@ -328,9 +332,12 @@ describe('readStruct', () => {
             }
         };
 
+        // Mock toObject to return an empty object
+        xJet.spyOn(PersonStruct, 'toObject').mockReturnValue({});
+
         const result = readStruct.call(context);
 
-        // It should return an empty array
+        // When arraySize is 0 (falsy), readStruct calls readSingleStruct, not readStructArray
         expect(Array.isArray(result)).toBe(false);
         expect(result).toEqual({});
     });
@@ -343,8 +350,8 @@ describe('readStruct', () => {
             address: { type: AddressStruct }
         });
 
-        // Mock the nested structure behavior
-        UserStruct.toObject = jest.fn().mockReturnValue({
+        // Mock the nested structure behavior - spy on UserStruct, not AddressStruct
+        xJet.spyOn(UserStruct, 'toObject').mockReturnValue({
             id: 123,
             name: 'Jane Smith',
             address: {

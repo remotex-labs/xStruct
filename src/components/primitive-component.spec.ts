@@ -2,26 +2,16 @@
  * Import will remove at compile time
  */
 
-import type {
-    PrimitiveType,
-    PrimitiveContextInterface,
-    PositionedPrimitiveDescriptorType
-} from '@components/interfaces/primitive-component.interface';
+import type { PositionedPrimitiveDescriptorType } from '@components/interfaces/primitive-component.interface';
+import type { PrimitiveType, PrimitiveContextInterface } from '@components/interfaces/primitive-component.interface';
 
 /**
  * Imports
  */
 
-import {
-    readPrimitive,
-    writePrimitive,
-    readPrimitiveArray,
-    readSinglePrimitive,
-    writePrimitiveArray,
-    writeSinglePrimitive,
-    PRIMITIVE_TYPE_SIZES,
-    parsePrimitiveDescriptor
-} from '@components/primitive.component';
+import { readSinglePrimitive, writePrimitiveArray } from '@components/primitive.component';
+import { readPrimitive, writePrimitive, readPrimitiveArray } from '@components/primitive.component';
+import { writeSinglePrimitive, PRIMITIVE_TYPE_SIZES, parsePrimitiveDescriptor } from '@components/primitive.component';
 
 /**
  * Tests
@@ -63,22 +53,22 @@ describe('parsePrimitiveDescriptor', () => {
         });
     });
 
-    test.each([
+    test.each(
         [ 'empty string', '' ],
         [ 'missing closing bracket', 'UInt8[' ],
         [ 'empty brackets', 'UInt8[]' ],
         [ 'non-numeric array size', 'UInt8[abc]' ],
         [ 'spaces in descriptor', 'UInt8 [5]' ],
         [ 'starting with number', '8UInt' ]
-    ])('should throw error for invalid descriptor format: %s', (_, input) => {
+    )('should throw error for invalid descriptor format: %s', ([ , input ]) => {
         expect(() => parsePrimitiveDescriptor(input)).toThrow('Invalid primitive descriptor:');
     });
 
-    test.each([
+    test.each(
         [ 'Unknown', 'Unknown' ],
         [ 'Float32[5]', 'Float32' ],
         [ 'String[10]', 'String' ]
-    ])('should throw error for unsupported primitive type: %s', (input, expectedTypeInError) => {
+    )('should throw error for unsupported primitive type: %s', ([ input, expectedTypeInError ]) => {
         expect(() => parsePrimitiveDescriptor(input)).toThrow(`Invalid primitive type: ${ expectedTypeInError }`);
     });
 });
