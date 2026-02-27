@@ -24,7 +24,7 @@ export const config: xBuildConfig = {
             platform: 'node',
             packages: 'external',
             sourcemap: true,
-            sourceRoot: `https://github.com/remotex-lab/xStruct/tree/v${ pkg.version }/`,
+            sourceRoot: `https://github.com/remotex-labs/xStruct/tree/v${ pkg.version }///`,
             entryPoints: {
                 'index': 'src/index.ts'
             }
