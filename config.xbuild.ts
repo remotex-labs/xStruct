@@ -15,14 +15,11 @@ import pkg from './package.json' with { type: 'json' };
  * Config build
  */
 
-const config: Array<xBuildConfig> = [
-    {
-        bundleDeclaration: true,
+export const config: xBuildConfig = {
+    common: {
         esbuild: {
             bundle: true,
             minify: true,
-            format: 'esm',
-            outdir: 'dist/esm',
             target: [ `node${ version.slice(1) }` ],
             platform: 'node',
             packages: 'external',
@@ -33,15 +30,21 @@ const config: Array<xBuildConfig> = [
             }
         }
     },
-    {
-        bundleDeclaration: false,
-        noTypeChecker: true,
-        esbuild: {
-            bundle: true,
-            format: 'cjs',
-            outdir: 'dist/cjs'
+    variants: {
+        esm: {
+            esbuild: {
+                format: 'esm',
+                outdir: 'dist/esm'
+            }
+        },
+        cjs: {
+            declaration: false,
+            esbuild: {
+                format: 'cjs',
+                outdir: 'dist/cjs'
+            }
         }
     }
-];
+};
 
 export default config;
