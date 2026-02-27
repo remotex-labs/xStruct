@@ -16,13 +16,69 @@ export default defineConfig([
     {
         plugins: {
             tsdoc,
-            perfectionist
+            perfectionist,
+            inline: {
+                rules: {
+                    'require-only-in-inline': {
+                        meta: {
+                            type: 'problem',
+                            docs: {
+                                description:
+                                    'Allow require() only inside the function body passed to $$inline()'
+                            },
+                            schema: [],
+                            messages: {
+                                notAllowed:
+                                    'require() is only allowed inside $$inline() function body.'
+                            }
+                        },
+                        create(context) {
+                            function isInsideInline(node) {
+                                let current = node;
+                                while (current) {
+                                    if (
+                                        current.type === 'CallExpression' &&
+                                        current.callee.type === 'Identifier' &&
+                                        current.callee.name === '$$inline'
+                                    ) {
+                                        return true;
+                                    }
+                                    current = current.parent;
+                                }
+
+                                return false;
+                            }
+
+                            return {
+                                CallExpression(node) {
+                                    if (
+                                        node.callee.type === 'Identifier' &&
+                                        node.callee.name === 'require' &&
+                                        !isInsideInline(node)
+                                    ) {
+                                        context.report({
+                                            node,
+                                            messageId: 'notAllowed'
+                                        });
+                                    }
+                                }
+                            };
+                        }
+                    }
+                }
+            }
         },
         languageOptions: {
             sourceType: 'module',
             ecmaVersion: 'latest'
         },
         rules: {
+            // Disable strict require() rule because we allow it in $$inline
+            '@typescript-eslint/no-require-imports': 'off',
+
+            // Enable inline rule
+            'inline/require-only-in-inline': 'error',
+
             // Tsdoc
             'tsdoc/syntax': 'error',
 
@@ -107,12 +163,12 @@ export default defineConfig([
 
                     groups: [
                         'type',
+                        'style',
                         [
                             'internal', 'parent',
                             'sibling', 'index',
                             'builtin', 'external'
-                        ],
-                        'object'
+                        ]
                     ]
                 }
             ],
@@ -216,10 +272,31 @@ export default defineConfig([
         }
     },
     {
+        files: [ '**/*.js', '**/*.cjs', '**/*.mjs' ],
+        languageOptions: {
+            parser: undefined,
+            sourceType: 'module',
+            ecmaVersion: 'latest'
+        },
+        rules: {
+            '@typescript-eslint/no-require-imports': 'off',
+            '@typescript-eslint/no-unused-vars': 'off',
+            '@typescript-eslint/no-explicit-any': 'off',
+            '@typescript-eslint/explicit-function-return-type': 'off',
+            '@typescript-eslint/explicit-module-boundary-types': 'off',
+            '@typescript-eslint/consistent-type-imports': 'off',
+            '@typescript-eslint/naming-convention': 'off',
+            '@typescript-eslint/member-ordering': 'off',
+            '@typescript-eslint/no-invalid-this': 'off',
+            '@typescript-eslint/no-dupe-class-members': 'off',
+            '@typescript-eslint/no-redeclare': 'off',
+            '@typescript-eslint/no-namespace': 'off'
+        }
+    },
+    {
         ignores: [
             'dist/*',
             'includes/*',
-            'jest.config.cjs',
             'docs/.vitepress/dist/*',
             'docs/.vitepress/cache/*'
         ]
