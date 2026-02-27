@@ -1,0 +1,61 @@
+name: Test
+
+on:
+    pull_request:
+        branches: [ '**' ]
+        types: [ opened, synchronize, reopened ]
+
+    # Allow manual deployment
+    workflow_dispatch:
+
+jobs:
+    test:
+        name: Test (Node ${{ matrix.node }})
+        runs-on: ubuntu-latest
+
+        strategy:
+            matrix:
+                node: [ 20, 22, 24 ]
+
+        steps:
+            # Checkout repository code
+            -   name: Checkout repository
+                uses: actions/checkout@v5
+
+            # Setup pnpm package manager
+            -   name: Setup pnpm
+                uses: pnpm/action-setup@v4
+                with:
+                    version: latest
+
+            # Setup Node.js with caching
+            -   name: Setup Node.js
+                uses: actions/setup-node@v6
+                with:
+                    node-version: ${{ matrix.node }}
+                    cache: 'pnpm'
+
+            # Cache pnpm store for faster installs
+            -   name: Cache pnpm store
+                uses: actions/cache@v4
+                with:
+                    path: ~/.pnpm-store
+                    key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+                    restore-keys: |
+                        ${{ runner.os }}-pnpm-
+
+            # Install dependencies (equivalent to npm ci)
+            -   name: Install dependencies
+                run: pnpm install --frozen-lockfile --ignore-scripts
+
+            # Run linting checks
+            -   name: Lint
+                run: pnpm run lint
+
+            # Build the package
+            -   name: Build
+                run: pnpm run build
+
+            # Run test suite
+            -   name: Test
+                run: pnpm run test

@@ -1,64 +1,129 @@
-# Sample workflow for building and deploying a VitePress site to GitHub Pages
-#
-name: Deploy VitePress site to Pages
+name: Deploy
 
 on:
+    # Trigger on new GitHub releases
     release:
         types: [ published ]
-
-    # Allows you to run this workflow manually from the Actions tab
+    # Allow manual deployment
     workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+# Required permissions for deployment
 permissions:
-    contents: read
     pages: write
+    contents: write
     id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+# Prevent concurrent deployments
 concurrency:
-    group: pages
+    group: deploy
     cancel-in-progress: false
 
 jobs:
-    # Build job
-    build:
+    publish-npm:
+        name: Publish to npm
         runs-on: ubuntu-latest
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0 # Not needed if lastUpdated is not enabled
-            # - uses: pnpm/action-setup@v3 # Uncomment this block if you're using pnpm
-            #   with:
-            #     version: 9 # Not needed if you've set "packageManager" in package.json
-            # - uses: oven-sh/setup-bun@v1 # Uncomment this if you're using Bun
-            - name: Setup Node
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 22
-                  cache: npm # or pnpm / yarn
-            - name: Setup Pages
-              uses: actions/configure-pages@v4
-            - name: Install dependencies
-              run: npm ci # or pnpm install / yarn install / bun install
-            - name: Build with VitePress
-              run: npm run docs:build # or pnpm docs:build / yarn docs:build / bun run docs:build
-            - name: Upload artifact
-              uses: actions/upload-pages-artifact@v3
-              with:
-                  path: docs/.vitepress/dist
+        if: github.event_name == 'release'
 
-    # Deployment job
-    deploy:
-        environment:
-            name: github-pages
-            url: ${{ steps.deployment.outputs.page_url }}
-        needs: build
-        runs-on: ubuntu-latest
-        name: Deploy
         steps:
-            - name: Deploy to GitHub Pages
-              id: deployment
-              uses: actions/deploy-pages@v4
+            # Checkout repository code
+            -   name: Checkout
+                uses: actions/checkout@v5
+
+            # Setup pnpm package manager
+            -   name: Setup pnpm
+                uses: pnpm/action-setup@v4
+                with:
+                    version: latest
+
+            # Setup Node.js LTS with npm registry
+            -   name: Setup Node.js
+                uses: actions/setup-node@v6
+                with:
+                    cache: 'pnpm'
+                    node-version: 22
+                    registry-url: 'https://registry.npmjs.org'
+
+            # Cache pnpm store for faster installs
+            -   name: Cache pnpm store
+                uses: actions/cache@v4
+                with:
+                    path: ~/.pnpm-store
+                    key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+                    restore-keys: |
+                        ${{ runner.os }}-pnpm-
+
+            # Install dependencies
+            -   name: Install dependencies
+                run: pnpm install --frozen-lockfile --ignore-scripts
+
+            -   name: Run lint, typecheck and build (package)
+                run: |
+                    pnpm run lint
+                    pnpm run test
+
+            -   name: Run npm version command
+                run: npm --no-git-tag-version version from-git
+
+            # Build the package
+            -   name: Build
+                run: pnpm run build
+
+            # Publish to npm if version is new
+            -   name: Publish to npm
+                run: pnpm publish --access public --no-git-checks
+                env:
+                    NODE_AUTH_TOKEN: ${{ secrets.REMOTEX_LAB_TOKEN }}
+
+    deploy-docs:
+        name: Deploy VitePress docs
+        runs-on: ubuntu-latest
+        needs: publish-npm
+
+        steps:
+            # Checkout repository code
+            -   name: Checkout
+                uses: actions/checkout@v5
+
+            # Setup pnpm package manager
+            -   name: Setup pnpm
+                uses: pnpm/action-setup@v4
+                with:
+                    version: latest
+
+            # Setup Node.js LTS
+            -   name: Setup Node.js
+                uses: actions/setup-node@v6
+                with:
+                    node-version: 22
+                    cache: 'pnpm'
+
+            # Cache pnpm store for faster installs
+            -   name: Cache pnpm store
+                uses: actions/cache@v4
+                with:
+                    path: ~/.pnpm-store
+                    key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+                    restore-keys: |
+                        ${{ runner.os }}-pnpm-
+
+            # Install dependencies
+            -   name: Install dependencies
+                run: pnpm install --frozen-lockfile --ignore-scripts
+
+            # Build VitePress documentation
+            -   name: Build docs
+                run: pnpm docs:build
+
+            # Setup GitHub Pages
+            -   name: Setup Pages
+                uses: actions/configure-pages@v5
+
+            # Upload docs artifact
+            -   name: Upload artifact
+                uses: actions/upload-pages-artifact@v3
+                with:
+                    path: docs/.vitepress/dist
+
+            # Deploy to GitHub Pages
+            -   name: Deploy to GitHub Pages
+                uses: actions/deploy-pages@v4

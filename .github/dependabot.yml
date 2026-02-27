@@ -1,15 +1,33 @@
-# .github/dependabot.yml
+# Dependabot configuration for security alerts only
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
 version: 2
+
 updates:
+    # Monitor npm dependencies for security alerts only
     -   package-ecosystem: "npm"
         directory: "/"
         schedule:
-            interval: "monthly"
-        commit-message:
-            prefix: fix
-            prefix-development: chore
-            include: scope
-        open-pull-requests-limit: 10
+            interval: "weekly"
+            day: "monday"
+            time: "09:00"
+            timezone: "UTC"
+        # Disable automatic PRs by setting the limit to 0
+        open-pull-requests-limit: 0
         labels:
             - "dependencies"
             - "npm"
+
+    # Monitor GitHub Actions for security alerts only
+    -   package-ecosystem: "github-actions"
+        directory: "/"
+        schedule:
+            interval: "weekly"
+            day: "monday"
+            time: "09:00"
+            timezone: "UTC"
+        # Disable automatic PRs by setting the limit to 0
+        open-pull-requests-limit: 0
+        labels:
+            - "dependencies"
+            - "github-actions"

@@ -1,32 +1,43 @@
 ---
-name: Bug reports
-about: Create a reports to help us improve
-title: ''
-labels: ''
+name: 🐞 Bug Report
+about: Report a bug or regression in @remotex-labs/xstruct
+title: "[BUG] "
+labels: bug
 assignees: ''
-
 ---
 
-### This is a...
+## Description
 
-* [ ] feature request
-* [ ] bug report
-* [ ] usage question
+<!-- A clear and concise description of what the bug is -->
 
-### Environment
+Select the type of issue:
 
-NodeJS Version:
-Typescript Version:
-OS:
+- [ ] Bug report
+- [ ] Feature request
+- [ ] Usage question
 
-### Link to repo showing the issue
-(optional, but helps _a lot_)
+## Steps to Reproduce
 
-### Expected Behaviour:
+<!-- Steps to reproduce the behavior -->
 
-### Actual Behaviour:
+## Expected Behavior
 
-### Stack Trace/Error Message:
+<!-- What you expected to happen -->
 
-### Additional Notes:
-(optional)
+## Package Version
+
+<!-- Which version of@remotex-labs/xbuild are you using? e.g., 1.2.3 -->
+
+**Version:**
+
+## Environment
+
+<!-- Information about your environment -->
+
+- **Node.js version:**
+- **pnpm / npm version:**
+- **Operating System:**
+
+## Additional Context
+
+<!-- Add any other context about the problem here (logs, screenshots, etc.) -->
