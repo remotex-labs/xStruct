@@ -993,6 +993,6 @@ Float operations are generally faster than Double on many processors, especially
 ## See Also
 
 - [Integer Types (UInt/Int)](./int.md) - Integer primitive types
-- [Bitfields Guide](../advanced/bitfields.md) - Bit-level data manipulation
+- [Bitfields Guide](bitfields.md) - Bit-level data manipulation
 - [Arrays Guide](../advanced/arrays.md) - Working with arrays of floats
 - [Best Practices](../advanced/best-practices.md) - Optimization and patterns

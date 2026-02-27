@@ -912,6 +912,6 @@ const replaySchema = new Struct({
 
 - [Integer Types (UInt/Int)](../primitive/int.md) - Integer primitive types
 - [Float Types](../primitive/float.md) - Floating-point types
-- [Strings Guide](./strings.md) - String handling
+- [Strings Guide](../primitive/strings.md) - String handling
 - [Nested Structs](./nested-structs.md) - Complex structures
 - [Best Practices](./best-practices.md) - Optimization tips

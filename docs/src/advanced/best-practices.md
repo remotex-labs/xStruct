@@ -1011,6 +1011,6 @@ function processData(schema: Struct, data: any): boolean {
 ## See Also
 
 - [Arrays Guide](./arrays.md) - Working with arrays
-- [Bitfields Guide](./bitfields.md) - Bitfield usage
+- [Bitfields Guide](../primitive/bitfields.md) - Bitfield usage
 - [Endianness Guide](./endianness.md) - Byte ordering
 - [Getting Started](../guide.md) - Basic usage guide
