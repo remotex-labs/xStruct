@@ -3,7 +3,7 @@
     "compilerOptions": {
         "types": [
             "node",
-            "jest"
+            "@remotex-labs/xjet"
         ]
     },
     "include": [

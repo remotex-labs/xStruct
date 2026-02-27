@@ -165,8 +165,8 @@ describe('splitBufferWithGap', () => {
     test('should split a buffer at the specified position with no skip', () => {
         const [ first, second ] = splitBufferWithGap(testBuffer, 3);
 
-        expect(first).toHaveLength(3);
-        expect(second).toHaveLength(3);
+        expect(first.length).toBe(3);
+        expect(second.length).toBe(3);
 
         expect([ ...first ]).toEqual([ 1, 2, 3 ]);
         expect([ ...second ]).toEqual([ 4, 5, 6 ]);
@@ -175,8 +175,8 @@ describe('splitBufferWithGap', () => {
     test('should split a buffer with a gap between parts', () => {
         const [ first, second ] = splitBufferWithGap(testBuffer, 2, 1);
 
-        expect(first).toHaveLength(2);
-        expect(second).toHaveLength(3);
+        expect(first.length).toBe(2);
+        expect(second.length).toBe(3);
 
         expect([ ...first ]).toEqual([ 1, 2 ]);
         expect([ ...second ]).toEqual([ 4, 5, 6 ]);
@@ -185,8 +185,8 @@ describe('splitBufferWithGap', () => {
     test('should handle splitting at position 0', () => {
         const [ first, second ] = splitBufferWithGap(testBuffer, 0);
 
-        expect(first).toHaveLength(0);
-        expect(second).toHaveLength(6);
+        expect(first.length).toBe(0);
+        expect(second.length).toBe(6);
 
         expect([ ...first ]).toEqual([]);
         expect([ ...second ]).toEqual([ 1, 2, 3, 4, 5, 6 ]);
@@ -195,8 +195,8 @@ describe('splitBufferWithGap', () => {
     test('should handle splitting at the buffer end', () => {
         const [ first, second ] = splitBufferWithGap(testBuffer, 6);
 
-        expect(first).toHaveLength(6);
-        expect(second).toHaveLength(0);
+        expect(first.length).toBe(6);
+        expect(second.length).toBe(0);
 
         expect([ ...first ]).toEqual([ 1, 2, 3, 4, 5, 6 ]);
         expect([ ...second ]).toEqual([]);
@@ -205,8 +205,8 @@ describe('splitBufferWithGap', () => {
     test('should handle skipping beyond buffer length', () => {
         const [ first, second ] = splitBufferWithGap(testBuffer, 4, 10);
 
-        expect(first).toHaveLength(4);
-        expect(second).toHaveLength(0);
+        expect(first.length).toBe(4);
+        expect(second.length).toBe(0);
 
         expect([ ...first ]).toEqual([ 1, 2, 3, 4 ]);
         expect([ ...second ]).toEqual([]);
@@ -216,8 +216,8 @@ describe('splitBufferWithGap', () => {
         const emptyBuffer = Buffer.alloc(0);
         const [ first, second ] = splitBufferWithGap(emptyBuffer, 0);
 
-        expect(first).toHaveLength(0);
-        expect(second).toHaveLength(0);
+        expect(first.length).toBe(0);
+        expect(second.length).toBe(0);
 
         expect([ ...first ]).toEqual([]);
         expect([ ...second ]).toEqual([]);
@@ -226,8 +226,8 @@ describe('splitBufferWithGap', () => {
     test('should handle large skip values', () => {
         const [ first, second ] = splitBufferWithGap(testBuffer, 2, 10);
 
-        expect(first).toHaveLength(2);
-        expect(second).toHaveLength(0);
+        expect(first.length).toBe(2);
+        expect(second.length).toBe(0);
 
         expect([ ...first ]).toEqual([ 1, 2 ]);
         expect([ ...second ]).toEqual([]);
@@ -248,8 +248,8 @@ describe('splitBufferWithGap', () => {
     test('should handle exactly reaching the end with skip', () => {
         const [ first, second ] = splitBufferWithGap(testBuffer, 3, 3);
 
-        expect(first).toHaveLength(3);
-        expect(second).toHaveLength(0);
+        expect(first.length).toBe(3);
+        expect(second.length).toBe(0);
 
         expect([ ...first ]).toEqual([ 1, 2, 3 ]);
         expect([ ...second ]).toEqual([]);

@@ -1,12 +1,15 @@
 # Contributing to xStruct
-Thank you for considering contributing to xStruct! This document outlines the process for contributing to 
+
+Thank you for considering contributing to xStruct! This document outlines the process for contributing to
 the project and provides guidelines to make the process smooth for everyone involved.
 
 ## Code of Conduct
-By participating in this project, you agree to abide by our code of conduct. 
+
+By participating in this project, you agree to abide by our code of conduct.
 Please be respectful, inclusive, and considerate when interacting with other contributors.
 
 ## Development Workflow
+
 ### Setting Up Your Environment
 
 The project uses TypeScript and requires Node.js (20+). After installing dependencies, you can:
@@ -24,6 +27,7 @@ The project uses TypeScript and requires Node.js (20+). After installing depende
 5. Commit your changes with clear, descriptive commit messages
 
 ### Commit Message Guidelines
+
 Follow these best practices for commit messages:
 
 - Use the present tense ("Add feature" not "Added feature")
@@ -32,7 +36,8 @@ Follow these best practices for commit messages:
 - Reference issues and pull requests liberally after the first line
 
 Example:
-```
+
+```text
 string.matcher: Add `toMatchPattern()` matcher
 
 This new matcher allows testing against regular expression patterns
@@ -42,6 +47,7 @@ Fixes #123
 ```
 
 ## Pull Request Process
+
 1. **Update your fork** with the latest changes from the main repository
 
 ```shell script
@@ -50,22 +56,24 @@ git fetch upstream
 git rebase upstream/main
 ```
 
-2. **Push your changes** to your fork
+1. **Push your changes** to your fork
+
 ```shell script
 git push origin feature/your-feature-name
 ```
 
-3. **Submit a pull request** to the main repository
+1. **Submit a pull request** to the main repository
     - Provide a clear title and description
     - Reference any related issues
     - Explain what your changes do and why they should be included
 
-4. **Address review feedback**
+2. **Address review feedback**
     - Respond to comments and make requested changes
     - Push additional commits to your branch as needed
     - The maintainers may ask for changes before merging
 
 ## Testing
+
 Every new feature or bug fix should include appropriate tests:
 
 - Unit tests for new matchers or utilities
@@ -78,13 +86,11 @@ Run the test suite to ensure your changes don't break existing functionality:
 npm test
 ```
 
-
 For thorough testing, you can also run:
 
 ```shell script
 npm run test:coverage
 ```
-
 
 ## Documentation
 

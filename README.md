@@ -1,11 +1,13 @@
 # xStruct
-[![npm version](https://img.shields.io/badge/Documentation-orange?logo=typescript&logoColor=f5f5f5)](https://remotex-labs.github.io/xStruct/)
-[![npm version](https://img.shields.io/npm/v/@remotex-labs/xstruct.svg)](https://www.npmjs.com/package/@remotex-labs/xstruct)
+
+[![Documentation](https://img.shields.io/badge/Documentation-orange?logo=typescript&logoColor=f5f5f5)](https://remotex-labs.github.io/xStruct/)
+[![npm version](https://img.shields.io/npm/v/@remotex-labs/xstruct.svg)](https://www.npmjs.com/package/@remotex-labs/xStruct)
 [![License: MPL 2.0](https://img.shields.io/badge/License-MPL_2.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0)
-[![Node.js CI](https://github.com/remotex-labs/xStruct/actions/workflows/node.js.yml/badge.svg)](https://github.com/remotex-labs/xnasi/actions/workflows/node.js.yml)
+[![Node.js CI](https://github.com/remotex-labs/xStruct/actions/workflows/test.yml/badge.svg)](https://github.com/remotex-labs/xStruct/actions/workflows/test.yml)
+[![Discord](https://img.shields.io/discord/1364348850696884234?logo=Discord&label=Discord)](https://discord.gg/psV9grS9th)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/remotex-labs/xStruct)
 
-A compact (10kb) TypeScript library for defining, serializing, and deserializing binary data structures with support for primitive types, bitfields, arrays, and nested structures.
+A TypeScript library for defining, serializing, and deserializing binary data structures with support for primitive types, bitfields, arrays, and nested structures.
 
 This library provides a simple way to define and serialize data structures (structs) with support for both regular fields and bitfields.  
 The library supports nested structs, allowing complex data structures to be serialized and deserialized easily.  
@@ -13,7 +15,6 @@ It is designed to work with binary buffers for use in scenarios like network pro
 
 ## Key Features
 
-- **Lightweight**: Only 10kb, optimized for both CommonJS and ESM
 - **Powerful**: Handle complex binary structures with minimal code
 - **Type-safe**: Full TypeScript support with interface validation
 - **Flexible**: Support for primitive types, strings, arrays, and nested structures
@@ -22,18 +23,18 @@ It is designed to work with binary buffers for use in scenarios like network pro
 
 ### Integer Types
 
-| Type | Description | Range |
-|------|-------------|-------|
-| **Unsigned** | | |
-| `UInt8` | 8-bit unsigned | 0 to 255 |
-| `UInt16LE/BE` | 16-bit unsigned (little/big endian) | 0 to 65,535 |
-| `UInt32LE/BE` | 32-bit unsigned (little/big endian) | 0 to 4,294,967,295 |
-| `BigUInt64LE/BE` | 64-bit unsigned (little/big endian) | 0 to 2^64-1 |
-| **Signed** | | |
-| `Int8` | 8-bit signed | -128 to 127 |
-| `Int16LE/BE` | 16-bit signed (little/big endian) | -32,768 to 32,767 |
-| `Int32LE/BE` | 32-bit signed (little/big endian) | -2,147,483,648 to 2,147,483,647 |
-| `BigInt64LE/BE` | 64-bit signed (little/big endian) | -2^63 to 2^63-1 |
+| Type             | Description                         | Range                           |
+|------------------|-------------------------------------|---------------------------------|
+| **Unsigned**     |                                     |                                 |
+| `UInt8`          | 8-bit unsigned                      | 0 to 255                        |
+| `UInt16LE/BE`    | 16-bit unsigned (little/big endian) | 0 to 65,535                     |
+| `UInt32LE/BE`    | 32-bit unsigned (little/big endian) | 0 to 4,294,967,295              |
+| `BigUInt64LE/BE` | 64-bit unsigned (little/big endian) | 0 to 2^64-1                     |
+| **Signed**       |                                     |                                 |
+| `Int8`           | 8-bit signed                        | -128 to 127                     |
+| `Int16LE/BE`     | 16-bit signed (little/big endian)   | -32,768 to 32,767               |
+| `Int32LE/BE`     | 32-bit signed (little/big endian)   | -2,147,483,648 to 2,147,483,647 |
+| `BigInt64LE/BE`  | 64-bit signed (little/big endian)   | -2^63 to 2^63-1                 |
 
 ### Floating Point Types
 
@@ -51,6 +52,7 @@ It is designed to work with binary buffers for use in scenarios like network pro
 Defined as `Type:BitCount` (e.g., `UInt8:3` for 3 bits from an 8-bit unsigned integer).
 
 Supported formats:
+
 - 8-bit: `UInt8:1` to `UInt8:8`, `Int8:1` to `Int8:8`
 - 16-bit: `UInt16LE/BE:1` to `UInt16LE/BE:16`, `Int16LE/BE:1` to `Int16LE/BE:16`
 
@@ -66,7 +68,7 @@ yarn add @remotex-labs/xstruct
 
 ### Basic Struct Definition
 
-```typescript
+```ts
 import { Struct } from '@remotex-labs/xstruct';
 
 const headerStruct = new Struct({
@@ -96,7 +98,7 @@ const data = headerStruct.toObject(buffer);
 
 #### String and string arrays can be defined by appending the array size in square brackets:
 
-```typescript
+```ts
 new Struct({
     a: 'string',     // Single string with default encoding
     b: 'ascii',      // Single ASCII-encoded string
@@ -112,7 +114,7 @@ new Struct({
 
 #### Fixed-Size Strings
 
-```typescript
+```ts
 const fixedStruct = new Struct({
   name: { type: 'ascii', size: 10 },  // 10 bytes, padded or truncated
   description: { type: 'utf8', size: 32 }  // 32 bytes, padded or truncated
@@ -125,7 +127,7 @@ const fixedStruct = new Struct({
 - `UInt16LE`/`UInt16BE`: 2-byte prefix (strings up to 65,535 bytes)
 - `UInt32LE`/`UInt32BE`: 4-byte prefix (strings up to 4GB)
 
-```typescript
+```ts
 const prefixedStruct = new Struct({
   shortText: { type: 'utf8', lengthType: 'UInt8' },       // Max 255 bytes
   mediumText: { type: 'utf8', lengthType: 'UInt16LE' }    // Max 65,535 bytes
@@ -134,21 +136,20 @@ const prefixedStruct = new Struct({
 
 #### Null-Terminated Strings
 
-```typescript
+```ts
 const nullTermStruct = new Struct({
   cString: { type: 'utf8', nullTerminated: true },
   limitedString: { type: 'ascii', nullTerminated: true, maxLength: 100 }
 });
 ```
 
-> **Note**: When writing strings, use the `nullTerminated` option with `maxLength` to limit string length during serialization only. 
-> This doesn't affect the buffer size calculation or reading. 
+> **Note**: When writing strings, use the `nullTerminated` option with `maxLength` to limit string length during serialization only.
+> This doesn't affect the buffer size calculation or reading.
 > If a null terminator is not found within the specified `maxLength` when reading, an error will be thrown.
-
 
 ### Arrays
 
-```typescript
+```ts
 const arrayStruct = new Struct({
   // Array of 8 Int32LE values
   intValues: 'Int32LE[8]',
@@ -160,7 +161,7 @@ const arrayStruct = new Struct({
 
 ### Nested Structs
 
-```typescript
+```ts
 // Define a Point struct
 const PointStruct = new Struct({
   x: 'Int32LE',
@@ -178,7 +179,7 @@ const shapeStruct = new Struct({
 
 ## Type-Safe Usage with TypeScript
 
-```typescript
+```ts
 interface Point {
   x: number;
   y: number;
@@ -210,20 +211,31 @@ const shape: Shape = {
 ```
 
 ## Documentation
+
 For complete API documentation, examples, and guides, visit: [xStruct Documentation](https://remotex-labs.github.io/xStruct/)
 
 ## Compatibility
+
 - Node.js 20+
 - All modern browsers (via bundlers)
 - TypeScript 4.5+
 
 ## Contributing
+
 Contributions are welcome!\
 Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
-
 ## License
+
 This project is licensed under the Mozilla Public License 2.0 - see the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments
+
 - Built with TypeScript
+
+## Links
+
+- [Documentation](https://remotex-labs.github.io/xStruct/)
+- [GitHub Repository](https://github.com/remotex-labs/xStruct)
+- [Issue Tracker](https://github.com/remotex-labs/xStruct/issues)
+- [npm Package](https://www.npmjs.com/package/@remotex-labs/xstruct)

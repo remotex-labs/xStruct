@@ -576,7 +576,7 @@ describe('getBitMask', () => {
 
     test('should use cache for subsequent calls with the same size', () => {
         // We'll spy on the Map.set method to verify caching behavior
-        const setSpy = jest.spyOn(maskCache, 'set');
+        const setSpy = xJet.spyOn(maskCache, 'set');
 
         // First call should calculate and cache
         const result1 = getBitMask(5);
@@ -707,15 +707,9 @@ describe('validateBitFieldBounds', () => {
             expect(() => validateBitFieldBounds(descriptor, -100)).toThrow(RangeError);
 
             // Verify error message includes relevant information
-            try {
+            expect(() => {
                 validateBitFieldBounds(descriptor, 4);
-                fail('Expected RangeError to be thrown');
-            } catch (error) {
-                const errorMessage = (error as Error).message;
-                expect(errorMessage).toContain('4');
-                expect(errorMessage).toContain('3');
-                expect(errorMessage).toContain('Int8');
-            }
+            }).toThrow(/4.*3.*Int8/);
         });
 
         test('should handle different signed bit sizes correctly', () => {
@@ -779,15 +773,9 @@ describe('validateBitFieldBounds', () => {
             expect(() => validateBitFieldBounds(descriptor, 100)).toThrow(RangeError);
 
             // Verify error message
-            try {
+            expect(() => {
                 validateBitFieldBounds(descriptor, 8);
-                fail('Expected RangeError to be thrown');
-            } catch (error) {
-                const errorMessage = (error as Error).message;
-                expect(errorMessage).toContain('8');
-                expect(errorMessage).toContain('3');
-                expect(errorMessage).toContain('UInt8');
-            }
+            }).toThrow(/8.*3.*UInt8/);
         });
 
         test('should handle different unsigned bit sizes correctly', () => {
@@ -1021,13 +1009,9 @@ describe('validateBitfieldParameters', () => {
             const operations = [ 'read', 'write', 'update', 'validate' ];
 
             operations.forEach(operation => {
-                try {
+                expect(() => {
                     validateBitfieldParameters(invalidDescriptor, operation);
-                    fail(`Expected error for operation ${ operation } was not thrown`);
-                } catch (error) {
-                    const message = (error as Error).message;
-                    expect(message).toContain(`for ${ operation }`);
-                }
+                }).toThrow(new RegExp(`for ${ operation }`));
             });
         });
     });
