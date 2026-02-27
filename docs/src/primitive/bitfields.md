@@ -877,7 +877,7 @@ const schema3 = new Struct({
 
 ## See Also
 
-- [Integer Types (UInt/Int)](../primitive/int.md) - Integer primitive types
-- [Arrays Guide](./arrays.md) - Working with arrays
-- [Best Practices](./best-practices.md) - Optimization tips
-- [Endianness Guide](./endianness.md) - Byte ordering
+- [Integer Types (UInt/Int)](int.md) - Integer primitive types
+- [Arrays Guide](../advanced/arrays.md) - Working with arrays
+- [Best Practices](../advanced/best-practices.md) - Optimization tips
+- [Endianness Guide](../advanced/endianness.md) - Byte ordering

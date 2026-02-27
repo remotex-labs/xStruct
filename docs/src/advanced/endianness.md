@@ -771,6 +771,6 @@ console.log(wrongBuffer.toString('ascii', 0, 4));  // 'TFYM' (backwards!)
 
 - [Integer Types (UInt/Int)](../primitive/int.md) - Integer primitive types
 - [Float Types](../primitive/float.md) - Floating-point types
-- [Bitfields Guide](./bitfields.md) - Bitfield endianness behavior
+- [Bitfields Guide](../primitive/bitfields.md) - Bitfield endianness behavior
 - [Best Practices](./best-practices.md) - Optimization tips
 - [Arrays Guide](./arrays.md) - Working with arrays

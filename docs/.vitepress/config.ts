@@ -46,7 +46,10 @@ export default defineVersionedConfig({
                     collapsed: false,
                     items: [
                         { text: 'Float', link: '/primitive/float' },
-                        { text: 'Uint/Int', link: '/primitive/int' }
+                        { text: 'Uint/Int', link: '/primitive/int' },
+                        { text: 'Strings', link: '/primitive/strings' },
+                        { text: 'Bitfields', link: '/primitive/bitfields' }
+
                     ]
                 },
                 {
@@ -54,9 +57,9 @@ export default defineVersionedConfig({
                     collapsed: false,
                     items: [
                         { text: 'Arrays', link: '/advanced/arrays' },
-                        { text: 'Bitfields', link: '/advanced/bitfields' },
                         { text: 'Endianness', link: '/advanced/endianness' },
-                        { text: 'Best practices', link: '/advanced/best-practices' }
+                        { text: 'Best practices', link: '/advanced/best-practices' },
+                        { text: 'Nested structs', link: '/advanced/nested-structs' }
                     ]
                 }
             ]
