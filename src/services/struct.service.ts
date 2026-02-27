@@ -6,19 +6,16 @@ import type {
     StructDataType,
     StructContextInterface
 } from '@components/interfaces/struct-component.interface';
-
 import type {
     BitfieldContextInterface,
     PositionedBitfieldDescriptorType
 } from '@components/interfaces/bitfield-component.interface';
-
 import type {
     PrimitiveType,
     PrimitiveDataType,
     PrimitiveContextInterface,
     PositionedDescriptorInterface
 } from '@components/interfaces/primitive-component.interface';
-
 import type {
     StringType,
     StringDataType,
@@ -26,7 +23,6 @@ import type {
     PositionedStringDescriptorType,
     LengthPrefixedDescriptorInterface
 } from '@components/interfaces/string-component.interface';
-
 import type {
     FieldsType,
     StringFieldType,
