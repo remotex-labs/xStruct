@@ -17,7 +17,7 @@ import './style.css';
 
 import { h } from 'vue';
 import DefaultTheme from 'vitepress/theme';
-import VersionSwitcher from './components/version-switcher.vue';
+import VersionSwitcher from '@viteplus/versions/components/version-switcher.component.vue';
 
 export default {
     extends: DefaultTheme,

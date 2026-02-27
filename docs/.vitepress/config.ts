@@ -1,15 +1,8 @@
 /**
- * Import will remove at compile time
- */
-
-import type { UserConfig } from 'vitepress';
-
-/**
  * Imports
  */
 
-import { join } from 'path';
-import defineVersionedConfig from 'vitepress-versioning-plugin';
+import { defineVersionedConfig } from '@viteplus/versions';
 
 /**
  * Doc config
@@ -18,7 +11,6 @@ import defineVersionedConfig from 'vitepress-versioning-plugin';
 export default defineVersionedConfig({
     title: 'xStruct',
     base: '/xStruct/',
-    srcDir: 'src',
     description: 'A binary Serialization Library for TypeScript',
     head: [
         [ 'link', { rel: 'icon', type: 'image/png', href: '/xStruct/xStruct.png' }],
@@ -29,9 +21,12 @@ export default defineVersionedConfig({
             'window.dataLayer = window.dataLayer || [];function gtag(){ dataLayer.push(arguments); }gtag(\'js\', new Date());gtag(\'config\', \'G-C30TKES06G\');'
         ]
     ],
+    versionsConfig: {
+        current: 'v2.x.x',
+        versionSwitcher: false
+    },
     themeConfig: {
-        logo: '/xStruct.png',
-        versionSwitcher: false,
+        logo: '/logo.png',
 
         search: {
             provider: 'local'
@@ -39,11 +34,33 @@ export default defineVersionedConfig({
 
         nav: [
             { text: 'Home', link: '/' },
-            { text: 'GitHub', link: 'https://github.com/remotex-labs/xStruct' },
-            {
-                component: 'VersionSwitcher'
-            }
+            { text: 'Guide', link: '/guide' },
+            { component: 'VersionSwitcher' }
         ],
+
+        sidebar: {
+            root: [
+                { text: 'Guide', link: '/guide' },
+                {
+                    text: 'Primitive',
+                    collapsed: false,
+                    items: [
+                        { text: 'Float', link: '/primitive/float' },
+                        { text: 'Uint/Int', link: '/primitive/int' }
+                    ]
+                },
+                {
+                    text: 'Advanced',
+                    collapsed: false,
+                    items: [
+                        { text: 'Arrays', link: '/advanced/arrays' },
+                        { text: 'Bitfields', link: '/advanced/bitfields' },
+                        { text: 'Endianness', link: '/advanced/endianness' },
+                        { text: 'Best practices', link: '/advanced/best-practices' }
+                    ]
+                }
+            ]
+        },
 
         socialLinks: [
             { icon: 'github', link: 'https://github.com/remotex-labs/xStruct' },
@@ -53,9 +70,10 @@ export default defineVersionedConfig({
         docFooter: {
             prev: false,
             next: false
+        },
+        footer: {
+            message: 'Released under the Mozilla Public License 2.0',
+            copyright: `Copyright © ${ new Date().getFullYear() } @remotex-labs/xBuild Contributors`
         }
-    },
-    versioning: {
-        latestVersion: 'v2.0.x'
     }
-}, join(__dirname, '../src', 'versions')) as UserConfig;
+});

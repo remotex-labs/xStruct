@@ -66,14 +66,14 @@
     },
     "devDependencies": {
         "eslint": "^9.39.3",
-        "vitepress": "^1.6.4",
+        "vitepress": "^2.0.0-alpha.15",
         "markdownlint-cli": "^0.47.0",
         "typescript-eslint": "^8.56.0",
         "eslint-plugin-tsdoc": "^0.5.0",
         "eslint-plugin-perfectionist": "^5.6.0",
-        "vitepress-versioning-plugin": "^1.3.0",
         "@types/node": "^25.3.2",
         "@remotex-labs/xjet": "^1.5.4",
+        "@viteplus/versions": "^2.0.6",
         "@remotex-labs/xbuild": "^2.1.6"
     }
 }
