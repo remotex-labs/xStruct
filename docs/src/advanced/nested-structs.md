@@ -189,7 +189,7 @@ interface Metadata {
 const MetadataSchema = new Struct<Metadata>({
     header: HeaderSchema,
     timestamp: 'BigUInt64LE',
-    author: 'string[64]'
+    author: 'string(64)'
 });
 
 interface Document {
@@ -249,7 +249,7 @@ interface Skeleton {
 
 const SkeletonSchema = new Struct<Skeleton>({
     bones: { type: BoneSchema, arraySize: 20 },
-    name: 'string[32]'
+    name: 'string(32)'
 });
 ```
 
@@ -363,7 +363,7 @@ interface ChunkHeader {
 }
 
 const ChunkHeaderSchema = new Struct<ChunkHeader>({
-    type: 'string[4]',
+    type: 'string(4)',
     size: 'UInt32LE',
     checksum: 'UInt32LE'
 });
@@ -467,11 +467,11 @@ interface Address {
 }
 
 const AddressSchema = new Struct<Address>({
-    street: 'string[128]',
-    city: 'string[64]',
-    state: 'string[32]',
-    zipCode: 'string[16]',
-    country: 'string[32]'
+    street: 'string(128)',
+    city: 'string(64)',
+    state: 'string(32)',
+    zipCode: 'string(16)',
+    country: 'string(32)'
 });
 
 interface ContactInfo {
@@ -481,8 +481,8 @@ interface ContactInfo {
 }
 
 const ContactInfoSchema = new Struct<ContactInfo>({
-    email: 'string[128]',
-    phone: 'string[32]',
+    email: 'string(128)',
+    phone: 'string(32)',
     address: AddressSchema
 });
 
@@ -497,7 +497,7 @@ interface UserProfile {
 
 const UserProfileSchema = new Struct<UserProfile>({
     id: 'BigUInt64LE',
-    username: 'string[64]',
+    username: 'string(64)',
     contact: ContactInfoSchema,
     createdAt: 'BigUInt64LE',
     updatedAt: 'BigUInt64LE',
@@ -525,7 +525,7 @@ interface ColorSpace {
 }
 
 const ColorSpaceSchema = new Struct<ColorSpace>({
-    type: 'string[16]',
+    type: 'string(16)',
     depth: 'UInt8',
     channels: 'UInt8'
 });
@@ -539,8 +539,8 @@ interface Camera {
 }
 
 const CameraSchema = new Struct<Camera>({
-    make: 'string[32]',
-    model: 'string[32]',
+    make: 'string(32)',
+    model: 'string(32)',
     exposureTime: 'FloatLE',
     fNumber: 'FloatLE',
     iso: 'UInt16LE'
@@ -640,8 +640,8 @@ interface User {
 
 const UserSchema = new Struct<User>({
     base: BaseEntitySchema,
-    username: 'string[64]',
-    email: 'string[128]'
+    username: 'string(64)',
+    email: 'string(128)'
 });
 
 interface Product {
@@ -653,9 +653,9 @@ interface Product {
 
 const ProductSchema = new Struct<Product>({
     base: BaseEntitySchema,
-    name: 'string[128]',
+    name: 'string(128)',
     price: 'UInt32LE',
-    sku: 'string[32]'
+    sku: 'string(32)'
 });
 ```
 
