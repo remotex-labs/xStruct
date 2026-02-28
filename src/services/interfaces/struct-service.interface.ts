@@ -11,6 +11,7 @@ import type { StringType, StringArrayType } from '@components/interfaces/string-
 import type { BitfieldDescriptorInterface } from '@components/interfaces/bitfield-component.interface';
 import type { PositionedStringDescriptorType } from '@components/interfaces/string-component.interface';
 import type { PositionedStructDescriptorType } from '@components/interfaces/struct-component.interface';
+import type { PrimitiveDescriptorInterface } from '@components/interfaces/primitive-component.interface';
 import type { PositionedBitfieldDescriptorType } from '@components/interfaces/bitfield-component.interface';
 import type { PrimitiveType, FloatPrimitiveType } from '@components/interfaces/primitive-component.interface';
 import type { PositionedPrimitiveDescriptorType } from '@components/interfaces/primitive-component.interface';
@@ -56,7 +57,8 @@ export type StringFieldType =
 export type DescriptorFieldType =
     | StringDescriptorType
     | StructDescriptorInterface
-    | BitfieldDescriptorInterface;
+    | BitfieldDescriptorInterface
+    | PrimitiveDescriptorInterface;
 
 /**
  * Represents field types within a descriptor that include positioning information,
