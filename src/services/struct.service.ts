@@ -319,7 +319,6 @@ export class Struct<T extends object = object> {
      * @since 2.0.0
      */
 
-
     private parseStringNotation(fieldNotation: StringFieldType, offset: number): PositionedDescriptorFieldType {
         if (fieldNotation.includes(':'))
             return parseBitfieldDescriptor(fieldNotation, offset);
