@@ -56,6 +56,7 @@ export default defineVersionedConfig({
                     text: 'Advanced',
                     collapsed: false,
                     items: [
+                        { text: 'Union', link: '/advanced/union' },
                         { text: 'Arrays', link: '/advanced/arrays' },
                         { text: 'Endianness', link: '/advanced/endianness' },
                         { text: 'Best practices', link: '/advanced/best-practices' },
