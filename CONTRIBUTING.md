@@ -51,7 +51,7 @@ Fixes #123
 1. **Update your fork** with the latest changes from the main repository
 
 ```shell script
-git remote add upstream https://github.com/remotex-lab/xStruct.git
+git remote add upstream https://github.com/remotex-labs/xStruct.git
 git fetch upstream
 git rebase upstream/main
 ```

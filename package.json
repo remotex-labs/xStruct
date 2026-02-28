@@ -5,16 +5,16 @@
     "types": "./dist/index.d.ts",
     "module": "./dist/esm/index.js",
     "author": "Garefild",
-    "version": "v1.0.0-local",
+    "version": "1.0.0-local",
     "license": "Mozilla Public License Version 2.0",
     "description": "This library provides a simple way to define and serialize data structures (structs) with support for both regular fields and bitfields",
     "homepage": "https://remotex-labs.github.io/xStruct",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/remotex-lab/xStruct.git"
+        "url": "git+https://github.com/remotex-labs/xStruct.git"
     },
     "bugs": {
-        "url": "https://github.com/remotex-lab/xStruct/issues"
+        "url": "https://github.com/remotex-labs/xStruct/issues"
     },
     "keywords": [
         "xStruct",

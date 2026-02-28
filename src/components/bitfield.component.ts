@@ -3,11 +3,9 @@
  */
 
 import type { PrimitiveType } from '@components/interfaces/primitive-component.interface';
-import type {
-    BitfieldContextInterface,
-    BitfieldDescriptorInterface,
-    PositionedBitfieldDescriptorType
-} from '@components/interfaces/bitfield-component.interface';
+import type { BitfieldContextInterface } from '@components/interfaces/bitfield-component.interface';
+import type { BitfieldDescriptorInterface } from '@components/interfaces/bitfield-component.interface';
+import type { PositionedBitfieldDescriptorType } from '@components/interfaces/bitfield-component.interface';
 
 /**
  * Imports
