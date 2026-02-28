@@ -2,11 +2,8 @@
  * Import will remove at compile time
  */
 
-import type {
-    StringType,
-    StringContextInterface,
-    PositionedStringDescriptorType, StringDataType
-} from '@components/interfaces/string-component.interface';
+import type { StringType, StringContextInterface } from '@components/interfaces/string-component.interface';
+import type { PositionedStringDescriptorType, StringDataType } from '@components/interfaces/string-component.interface';
 
 /**
  * Imports

@@ -2,13 +2,9 @@
  * Import will remove at compile time
  */
 
-import type {
-    PrimitiveType,
-    PrimitiveDataType,
-    FloatPrimitiveType,
-    PrimitiveContextInterface,
-    PositionedPrimitiveDescriptorType
-} from '@components/interfaces/primitive-component.interface';
+import type { PrimitiveType, PrimitiveDataType } from '@components/interfaces/primitive-component.interface';
+import type { PositionedPrimitiveDescriptorType } from '@components/interfaces/primitive-component.interface';
+import type { FloatPrimitiveType, PrimitiveContextInterface } from '@components/interfaces/primitive-component.interface';
 
 /**
  * Imports

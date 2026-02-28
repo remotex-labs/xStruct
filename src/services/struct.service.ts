@@ -1,51 +1,30 @@
 /**
- * Type imports
+ * Import will remove at compile time
  */
 
-import type {
-    StructDataType,
-    StructContextInterface
-} from '@components/interfaces/struct-component.interface';
-import type {
-    BitfieldContextInterface,
-    PositionedBitfieldDescriptorType
-} from '@components/interfaces/bitfield-component.interface';
-import type {
-    PrimitiveType,
-    PrimitiveDataType,
-    PrimitiveContextInterface,
-    PositionedDescriptorInterface
-} from '@components/interfaces/primitive-component.interface';
-import type {
-    StringType,
-    StringDataType,
-    StringContextInterface,
-    PositionedStringDescriptorType,
-    LengthPrefixedDescriptorInterface
-} from '@components/interfaces/string-component.interface';
-import type {
-    FieldsType,
-    StringFieldType,
-    ContextInterface,
-    DescriptorFieldType,
-    AccumulatorInterface,
-    StructSchemaInterface,
-    PositionedDescriptorFieldType
-} from '@services/interfaces/struct-service.interface';
+import type { BitfieldContextInterface } from '@components/interfaces/bitfield-component.interface';
+import type { PrimitiveContextInterface } from '@components/interfaces/primitive-component.interface';
+import type { PositionedStringDescriptorType } from '@components/interfaces/string-component.interface';
+import type { PositionedDescriptorInterface } from '@components/interfaces/primitive-component.interface';
+import type { LengthPrefixedDescriptorInterface } from '@components/interfaces/string-component.interface';
+import type { PositionedBitfieldDescriptorType } from '@components/interfaces/bitfield-component.interface';
+import type { PrimitiveType, PrimitiveDataType } from '@components/interfaces/primitive-component.interface';
+import type { DescriptorFieldType, AccumulatorInterface } from '@services/interfaces/struct-service.interface';
+import type { StructDataType, StructContextInterface } from '@components/interfaces/struct-component.interface';
+import type { FieldsType, StringFieldType, ContextInterface } from '@services/interfaces/struct-service.interface';
+import type { StructSchemaInterface, PositionedDescriptorFieldType } from '@services/interfaces/struct-service.interface';
+import type { StringType, StringDataType, StringContextInterface } from '@components/interfaces/string-component.interface';
 
 /**
- * Implementation imports
+ * Imports
  */
 
 import { readStruct, writeStruct } from '@components/struct.component';
+import { parsePrimitiveDescriptor } from '@components/primitive.component';
 import { parseBitfieldDescriptor, readBitfield, writeBitfield } from '@components/bitfield.component';
+import { readPrimitive, writePrimitive, PRIMITIVE_TYPE_SIZES } from '@components/primitive.component';
 import { parseStringDescriptor, readString, STRING_PRIMITIVE_LIST, writeString } from '@components/string.component';
-import {
-    readPrimitive,
-    writePrimitive,
-    PRIMITIVE_TYPE_SIZES,
-    parsePrimitiveDescriptor
-} from '@components/primitive.component';
+
 
 /**
  * A versatile class for creating and manipulating structured binary data objects

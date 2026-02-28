@@ -2,11 +2,8 @@
  * Import will remove at compile time
  */
 
-import type {
-    StructType,
-    StructDataType,
-    StructContextInterface
-} from '@components/interfaces/struct-component.interface';
+import type { StructType } from '@components/interfaces/struct-component.interface';
+import type { StructDataType, StructContextInterface } from '@components/interfaces/struct-component.interface';
 
 /**
  * Imports
