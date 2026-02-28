@@ -31,7 +31,7 @@ const FIXED_STRING_RE = /^(?:string|utf8|ascii)\(\d+\)$/i;
  *
  * @remarks
  * When a schema field is a bare string shorthand whose leading token matches one
- * of these values and it does **not** satisfy {@link FIXED_STRING_RE}, it is
+ * of these values, and it does **not** satisfy {@link FIXED_STRING_RE}, it is
  * considered dynamic. Dynamic members are rejected at {@link Union} construction
  * time because writing them resizes the buffer and would corrupt all sibling members.
  *
@@ -116,6 +116,44 @@ export const UNION_BRAND: unique symbol = Symbol('union');
  */
 
 export class Union<T extends object = object> extends Struct<T> {
+    /**
+     * Precompiled array of member metadata used by `toObject` and `toBuffer`.
+     *
+     * @remarks
+     * Populated once at construction time by wrapping each schema field in a
+     * single-field {@link Struct}. This eliminates runtime shape detection and
+     * ensures consistent encoding/decoding for all members, regardless of whether
+     * the original field was a primitive, descriptor, or nested {@link Struct}.
+     *
+     * **Structure:**
+     *
+     * Each entry contains:
+     * - `name` — the field key from the original schema
+     * - `struct` — an isolated {@link Struct} at offset 0 that encodes/decodes this member
+     * - `isStructMember` — `true` if the original field was a `Struct` or `Union` instance
+     *
+     * **Usage:**
+     *
+     * - `toObject` iterates through `members` and decodes each `struct` from the
+     *   same buffer slice (starting at offset 0), producing a full result object
+     *   with every member decoded.
+     * - `toBuffer` scans `members` in declaration order and serializes the first
+     *   member whose value is not `undefined`, then returns a zero-filled buffer
+     *   of `this.size` bytes.
+     *
+     * **Performance:**
+     *
+     * Because compilation happens once during construction, repeated calls to
+     * `toObject` and `toBuffer` avoid field-type checks and directly delegate
+     * to the prebuilt member structs, making read/write operations efficient.
+     *
+     * @see toBuffer
+     * @see toObject
+     * @see CompiledMemberInterface
+     *
+     * @since 2.1.0
+     */
+
     private readonly members: ReadonlyArray<CompiledMemberInterface>;
 
     /**
