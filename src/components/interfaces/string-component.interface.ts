@@ -52,11 +52,70 @@ export type StringType = 'utf8' | 'ascii' | 'string';
  * A parser function would typically convert this string representation into a
  * structured object that describes both the primitive type and its array size.
  *
+ * @see StringType
  * @see PrimitiveType
+ *
  * @since 2.0.0
  */
 
 export type StringArrayType = `${ StringType }[${ number }]`;
+
+/**
+ * Represents a fixed-length string type declaration
+ *
+ * @remarks
+ * This type defines the string format for declaring fixed-length strings using template literal syntax.
+ * The format follows the pattern 'type(length)', where:
+ * - 'type' is any valid StringType (utf8, ascii, string)
+ * - 'length' is a numeric value specifying the exact byte length of the string
+ *
+ * Fixed-length strings occupy a predetermined number of bytes in the buffer, regardless of the
+ * actual string content. Shorter strings will be padded, and longer strings will be truncated.
+ *
+ * @example
+ * ```ts
+ * // Valid StringFixedType examples:
+ * const fixedString1: StringFixedType = 'utf8(20)';  // Exactly 20 bytes
+ * const fixedString2: StringFixedType = 'ascii(50)'; // Exactly 50 bytes
+ * const fixedString3: StringFixedType = 'string(100)'; // Exactly 100 bytes
+ * ```
+ *
+ * @see StringType
+ *
+ * @since 2.1.0
+ */
+
+export type StringFixedType = `${ StringType }(${ number })`;
+
+/**
+ * Represents an array of fixed-length strings type declaration
+ *
+ * @remarks
+ * This type defines the string format for declaring arrays of fixed-length strings using template literal syntax.
+ * The format follows the pattern 'type(length)[size]', where:
+ * - 'type' is any valid StringType (utf8, ascii, string)
+ * - 'length' is a numeric value specifying the exact byte length of each string
+ * - 'size' is a numeric value specifying the number of strings in the array
+ *
+ * Each string in the array will occupy exactly the specified number of bytes, with no length prefixes.
+ * This is useful for creating compact binary structures with predictable memory layouts.
+ *
+ * @example
+ * ```ts
+ * // Valid StringFixedArrayType examples:
+ * const fixedArray1: StringFixedArrayType = 'utf8(20)[10]';  // 10 strings, each 20 bytes
+ * const fixedArray2: StringFixedArrayType = 'ascii(50)[5]';  // 5 strings, each 50 bytes
+ * const fixedArray3: StringFixedArrayType = 'string(100)[3]'; // 3 strings, each 100 bytes
+ * ```
+ *
+ * @see StringType
+ * @see StringFixedType
+ * @see StringArrayType
+ *
+ * @since 2.1.0
+ */
+
+export type StringFixedArrayType = `${ StringType }(${ number })[${ number }]`;
 
 /**
  * Represents a type that can be either a single string or an array of strings
@@ -228,7 +287,7 @@ export interface LengthPrefixedDescriptorInterface extends BaseDescriptorInterfa
  *   nullTerminated: true
  * };
  *
- * // A null-terminated ASCII string with maximum length of 100 bytes
+ * // A null-terminated ASCII string with a maximum length of 100 bytes
  * const limitedString: NullTerminatedDescriptorInterface = {
  *   type: 'ascii',
  *   nullTerminated: true,
@@ -292,7 +351,7 @@ export type StringDescriptorType =
  * - For `StringDescriptorInterface`: The exact number of bytes allocated for the string
  * - For `NullTerminatedDescriptorInterface`: The minimum size in the buffer (minimum size is null byte)
  * - For `LengthPrefixedDescriptorInterface`: The minimum number of bytes based on the prefix type
- *   (e.g., if UInt16 is used, minimum size is 2 bytes)
+ *   (e.g., if UInt16 is used, the minimum size is 2 bytes)
  *
  * @see StringDescriptorType
  * @see PositionedDescriptorInterface

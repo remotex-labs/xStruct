@@ -16,12 +16,14 @@ xStruct provides flexible string handling capabilities for binary data serializa
 
 ## Quick Reference Table
 
-| Type                                      | Description           | Length Prefix | Padding    | Use Case          |
-|-------------------------------------------|-----------------------|---------------|------------|-------------------|
-| `'string'`                                | Variable-length UTF-8 | UInt16LE      | N/A        | General text data |
-| `'string[N]'`                             | Fixed N bytes         | None          | Null bytes | Fixed-size fields |
-| `{ type: 'string', encoding: 'utf16le' }` | UTF-16LE variable     | UInt16LE      | N/A        | Unicode text      |
-| `{ type: 'string', size: N }`             | Fixed N bytes         | None          | Null bytes | Binary strings    |
+| Type                                      | Description                 | Length Prefix | Padding    | Use Case            |
+|-------------------------------------------|-----------------------------|---------------|------------|---------------------|
+| `'string'`                                | Variable-length UTF-8       | UInt16LE      | N/A        | General text data   |
+| `'string(N)'`                             | Fixed N bytes length        | None          | Null bytes | Fixed-size fields   |
+| `{ type: 'string', encoding: 'utf16le' }` | UTF-16LE variable           | UInt16LE      | N/A        | Unicode text        |
+| `{ type: 'string', size: N }`             | Fixed N bytes length        | None          | Null bytes | Binary strings      |
+| `'string[N]'`                             | Array of N variable strings | UInt16LE each | N/A        | String arrays       |
+| `'string(N)[M]'`                          | Array of M fixed-length     | None          | Null bytes | Fixed string arrays |
 
 ## Basic String Usage
 
@@ -58,9 +60,9 @@ The length prefix (UInt16LE by default) stores the byte length of the string, al
 
 ```ts
 const schema = new Struct({
-    code: 'string[4]',      // Exactly 4 bytes
-    name: 'string[32]',     // Exactly 32 bytes
-    hash: 'string[64]'      // Exactly 64 bytes
+    code: 'string(4)',      // Exactly 4 bytes
+    name: 'string(32)',     // Exactly 32 bytes
+    hash: 'string(64)'      // Exactly 64 bytes
 });
 
 const buffer = schema.toBuffer({
@@ -251,12 +253,22 @@ const buffer = schema.toBuffer({
 // Each string has its own length prefix
 ```
 
+```ts
+const schema = new Struct({
+    tags: 'string[5]'  // Array of 5 variable-length strings
+});
+
+const buffer = schema.toBuffer({
+    tags: [ 'javascript', 'typescript', 'node', 'binary', 'struct' ]
+});
+```
+
 ### Fixed-Length String Arrays
 
 ```ts
 const schema = new Struct({
     // Array of 10 strings, each exactly 8 bytes
-    codes: 'string[8][10]'
+    codes: 'string(8)[10]'
 });
 
 const buffer = schema.toBuffer({
@@ -280,8 +292,8 @@ interface ProtocolHeader {
 }
 
 const headerSchema = new Struct<ProtocolHeader>({
-    magic: 'string[4]',
-    version: 'string[8]',
+    magic: 'string(4)',
+    version: 'string(8)',
     method: { type: 'string', lengthType: 'UInt8' },
     path: 'string'
 });
@@ -324,8 +336,8 @@ interface FileMetadata {
 
 const metadataSchema = new Struct<FileMetadata>({
     filename: { type: 'string', lengthType: 'UInt16LE' },
-    extension: 'string[8]',  // Fixed: ".txt", ".json"
-    mimeType: 'string[64]',  // Fixed: "application/json"
+    extension: 'string(8)',  // Fixed: ".txt", ".json"
+    mimeType: 'string(64)',  // Fixed: "application/json"
     checksum: { type: 'string', encoding: 'hex', size: 64 }  // SHA-256
 });
 
@@ -347,7 +359,7 @@ interface I18nMessage {
 }
 
 const i18nSchema = new Struct<I18nMessage>({
-    locale: 'string[8]',  // Fixed locale code
+    locale: 'string(8)',  // Fixed locale code
     message: { type: 'string', encoding: 'utf8' },
     fallback: { type: 'string', encoding: 'utf8' }
 });
@@ -370,10 +382,10 @@ interface DatabaseRecord {
 }
 
 const recordSchema = new Struct<DatabaseRecord>({
-    id: 'string[36]',  // UUID: "550e8400-e29b-41d4-a716-446655440000"
+    id: 'string(36)',  // UUID: "550e8400-e29b-41d4-a716-446655440000"
     name: { type: 'string', lengthType: 'UInt8' },
     email: { type: 'string', lengthType: 'UInt8' },
-    createdAt: 'string[32]'  // ISO 8601: "2024-01-15T10:30:00.000Z"
+    createdAt: 'string(32)'  // ISO 8601: "2024-01-15T10:30:00.000Z"
 });
 ```
 
@@ -389,11 +401,11 @@ interface Config {
 }
 
 const configSchema = new Struct<Config>({
-    appName: 'string[64]',
-    version: 'string[16]',  // "1.0.0"
+    appName: 'string(64)',
+    version: 'string(16)',  // "1.0.0"
     description: 'string',  // Variable length
-    author: 'string[128]',
-    license: 'string[32]'   // "MIT", "Apache-2.0"
+    author: 'string(128)',
+    license: 'string(32)'   // "MIT", "Apache-2.0"
 });
 ```
 
@@ -404,10 +416,10 @@ const configSchema = new Struct<Config>({
 ```ts
 // ✅ Good: Fixed-size for known-length data
 const efficientSchema = new Struct({
-    currencyCode: 'string[3]',     // Always 3 chars: USD, EUR
-    countryCode: 'string[2]',      // Always 2 chars: US, GB
-    languageCode: 'string[5]',     // Up to 5 chars: en-US
-    status: 'string[8]'            // Known values: "active"
+    currencyCode: 'string(3)',     // Always 3 chars: USD, EUR
+    countryCode: 'string(2)',      // Always 2 chars: US, GB
+    languageCode: 'string(5)',     // Up to 5 chars: en-US
+    status: 'string(8)'            // Known values: "active"
 });
 
 // ❌ Bad: Variable-length for fixed data (wastes 2 bytes per field)
@@ -627,9 +639,9 @@ function deserializeCompressed(buffer: Buffer): string {
 ```ts
 // Use fixed-length for known-size data
 const goodSchema = new Struct({
-    countryCode: 'string[2]',       // ISO 3166-1 alpha-2
-    currencyCode: 'string[3]',      // ISO 4217
-    languageCode: 'string[5]'       // IETF language tag
+    countryCode: 'string(2)',       // ISO 3166-1 alpha-2
+    currencyCode: 'string(3)',      // ISO 4217
+    languageCode: 'string(5)'       // IETF language tag
 });
 
 // Choose appropriate encoding
@@ -654,8 +666,8 @@ interface Message {
 }
 
 const messageSchema = new Struct<Message>({
-    sender: 'string[64]',
-    recipient: 'string[64]',
+    sender: 'string(64)',
+    recipient: 'string(64)',
     subject: { type: 'string', lengthType: 'UInt8' },
     body: 'string'
 });
@@ -666,7 +678,7 @@ const messageSchema = new Struct<Message>({
 ```ts
 // Don't use variable-length for fixed data
 const wastefulSchema = new Struct({
-    currencyCode: 'string'  // ❌ Always 3 chars, use 'string[3]'
+    currencyCode: 'string'  // ❌ Always 3 chars, use 'string(3)'
 });
 
 // Don't use UTF-16 for ASCII data
@@ -694,7 +706,7 @@ const oversizedSchema = new Struct({
 ```ts
 // Problem: String gets truncated
 const schema = new Struct({
-    text: 'string[10]'
+    text: 'string(10)'
 });
 
 const buffer = schema.toBuffer({

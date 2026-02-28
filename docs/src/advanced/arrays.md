@@ -184,9 +184,9 @@ Fixed-size arrays of strings with length prefixes:
 
 ```ts
 const stringArraySchema = new Struct({
-    names: 'string[5]',       // 5 UTF-8 strings
-    codes: 'ascii[10]',       // 10 ASCII strings
-    labels: 'utf8[3]'         // 3 UTF-8 strings
+    names: 'string(5)',       // 5 bytes UTF-8 strings
+    codes: 'ascii(10)',       // 10 bytes ASCII strings
+    labels: 'utf8(3)'         // 3 bytes UTF-8 strings
 });
 
 const buffer = stringArraySchema.toBuffer({

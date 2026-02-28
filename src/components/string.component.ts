@@ -44,9 +44,66 @@ import { readMethod, splitBufferWithGap, writeMethod } from '@components/buffer.
 export const STRING_PRIMITIVE_LIST: Set<string> = new Set([ 'utf8', 'ascii', 'string' ]);
 
 /**
+ * Regular expression pattern for parsing string type descriptors in schema definitions
+ *
+ * @remarks
+ * This regex matches and captures string type declarations in various formats, enabling flexible
+ * string field definitions in binary structure schemas. The pattern supports:
+ *
+ * **Pattern Structure:**
+ * - **Capture Group 1**: String type identifier (`utf8`, `ascii`, or `string`)
+ * - **Capture Group 2**: Optional fixed length in parentheses `(length)` - specifies exact byte size
+ * - **Capture Group 3**: Optional array size in brackets `[size]` - specifies number of elements
+ *
+ * **Supported Formats:**
+ * 1. Simple type: `utf8`, `ascii`, `string`
+ *    - Creates a dynamic length-prefixed string with UInt16LE prefix
+ * 2. Fixed-length: `utf8(20)`, `ascii(50)`
+ *    - Creates a string that occupies exactly the specified number of bytes
+ * 3. Dynamic array: `utf8[10]`, `ascii[5]`
+ *    - Creates an array of dynamic strings, each with its own length prefix
+ * 4. Fixed-length array: `utf8(20)[10]`, `ascii(50)[5]`
+ *    - Creates an array where each string occupies exactly the specified number of bytes
+ *
+ * The regex is case-insensitive (`i` flag), allowing variations like `UTF8`, `Ascii`, or `STRING`.
+ *
+ * @example
+ * ```ts
+ * // Matching various string type patterns
+ * const pattern = /^(utf8|ascii|string)(?:\((\d+)\))?(?:\[(\d+)\])?$/i;
+ *
+ * // Simple type
+ * const match1 = 'utf8'.match(pattern);
+ * // match1[1] = 'utf8', match1[2] = undefined, match1[3] = undefined
+ *
+ * // Fixed-length string
+ * const match2 = 'ascii(50)'.match(pattern);
+ * // match2[1] = 'ascii', match2[2] = '50', match2[3] = undefined
+ *
+ * // Dynamic array
+ * const match3 = 'utf8[10]'.match(pattern);
+ * // match3[1] = 'utf8', match3[2] = undefined, match3[3] = '10'
+ *
+ * // Fixed-length array
+ * const match4 = 'string(20)[5]'.match(pattern);
+ * // match4[1] = 'string', match4[2] = '20', match4[3] = '5'
+ * ```
+ *
+ * @see StringType
+ * @see StringFixedType
+ * @see StringArrayType
+ * @see StringFixedArrayType
+ * @see parseStringDescriptor
+ *
+ * @since 2.1.0
+ */
+
+const STRING_REGEX = /^(utf8|ascii|string)(?:\((\d+)\))?(?:\[(\d+)\])?$/i;
+
+/**
  * Parses a string representation of a string type descriptor into a structured object with positioning information
  *
- * @param field - String representation of the string descriptor in format "type" or "type[size]"
+ * @param field - String representation of the string descriptor in format "type", "type(length)", "type[size]", or "type(length)[size]"
  * @param position - The starting position of this string within the buffer (defaults to 0)
  * @returns A structured PositionedStringDescriptor object with type, size, and offset information
  *
@@ -54,29 +111,45 @@ export const STRING_PRIMITIVE_LIST: Set<string> = new Set([ 'utf8', 'ascii', 'st
  *
  * @remarks
  * This function converts a string-based string type specification into a structured descriptor object.
- * The input string can be in one of two formats:
- * - A simple string type name (e.g., "utf8", "ascii", "string")
- * - A string type with array size specification (e.g., "utf8[10]", "ascii[25]")
+ * The input string can be in one of four formats:
+ * - A simple string type name (e.g., "utf8", "ascii", "string") - creates a dynamic length-prefixed string
+ * - A fixed-length string type (e.g., "utf8(20)", "ascii(50)") - creates a string with exactly the specified byte length
+ * - A string type with array size specification (e.g., "utf8[10]", "ascii[25]") - creates an array of dynamic strings
+ * - A fixed-length string array (e.g., "utf8(20)[10]", "ascii(50)[5]") - creates an array of fixed-length strings
  *
- * When an array size is specified (e.g., "utf8[10]"),
- * it represents an array of 10 dynamic strings, each with its own length prefix.
+ * When an array size is specified without a fixed length (e.g., "utf8[10]"),
+ * it represents an array of 10 dynamic strings, each with its own length prefix (UInt16LE by default).
  * Each string is stored sequentially in the buffer, one after another.
  *
- * The function validates that the input string matches the expected pattern for a valid string descriptor.
- * If an array size is specified in the descriptor, it is parsed as an integer and included in the returned object.
+ * When a fixed length is specified (e.g., "utf8(20)"), the string will occupy exactly that number of bytes
+ * in the buffer, regardless of the actual string content. Shorter strings will be padded, and longer strings
+ * will be truncated.
  *
- * By default, the function sets lengthType to 'UInt16LE', which means each string will be encoded with a
- * 2-byte length prefix, and size is initialized to 2 to account for the length prefix.
+ * When both fixed length and array size are specified (e.g., "utf8(20)[10]"), it creates an array of
+ * 10 strings, each occupying exactly 20 bytes.
+ *
+ * The function validates that the input string matches the expected pattern for a valid string descriptor.
+ * By default (when no fixed length is specified), the function sets lengthType to 'UInt16LE', which means
+ * each string will be encoded with a 2-byte length prefix, and size is initialized to 2 to account for
+ * the length prefix.
  *
  * @example
  * ```ts
- * // Parse a simple string type with offset
+ * // Parse a simple dynamic string type with offset
  * const descriptor1 = parseStringDescriptor('utf8', 0);
- * // Returns: { type: 'utf8', lengthType: 'UInt16LE', arraySize: undefined, offset: 0, size: 2 }
+ * // Returns: { type: 'utf8', lengthType: 'UInt16LE', arraySize: undefined, position: 0, size: 2, kind: 'string' }
+ *
+ * // Parse a fixed-length string (exactly 20 bytes)
+ * const descriptor2 = parseStringDescriptor('utf8(20)', 0);
+ * // Returns: { type: 'utf8', arraySize: undefined, position: 0, size: 20, kind: 'string' }
  *
  * // Parse a string type as an array of 15 dynamic strings with offset
- * const descriptor2 = parseStringDescriptor('ascii[15]', 24);
- * // Returns: { type: 'ascii', lengthType: 'UInt16LE', arraySize: 15, offset: 24, size: 2 }
+ * const descriptor3 = parseStringDescriptor('ascii[15]', 24);
+ * // Returns: { type: 'ascii', lengthType: 'UInt16LE', arraySize: 15, position: 24, size: 2, kind: 'string' }
+ *
+ * // Parse an array of 10 fixed-length strings, each 50 bytes
+ * const descriptor4 = parseStringDescriptor('utf8(50)[10]', 100);
+ * // Returns: { type: 'utf8', arraySize: 10, position: 100, size: 50, kind: 'string' }
  * ```
  *
  * @see StringType
@@ -87,14 +160,18 @@ export const STRING_PRIMITIVE_LIST: Set<string> = new Set([ 'utf8', 'ascii', 'st
  */
 
 export function parseStringDescriptor(field: string, position: number = 0): PositionedStringDescriptorType {
-    const pattern = /^(utf8|ascii|string)(?:\[(\d+)\])?$/i;
-    const match = <[string, StringType, string]> field.match(pattern);
+    const match = <[string, StringType, string, string]> field.match(STRING_REGEX);
 
     if (!match)
         throw new Error(`Invalid string descriptor: ${ field }`);
 
-    const type = <StringType> match[1].toLowerCase();
-    const arraySize = match[2] ? parseInt(match[2]) : undefined;
+    const type      = match[1].toLowerCase() as StringType;
+    const fixedLen  = match[2] ? parseInt(match[2]) : undefined;
+    const arraySize = match[3] ? parseInt(match[3]) : undefined;
+
+    if (fixedLen !== undefined) {
+        return { type, arraySize, position, size: fixedLen, kind: 'string' };
+    }
 
     return { type, arraySize, position, size: 2, lengthType: 'UInt16LE', kind: 'string' };
 }
