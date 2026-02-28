@@ -15,10 +15,6 @@ import { Struct } from '@services/struct.service';
  */
 
 describe('Struct.toObject', () => {
-    // Original test cases...
-
-    // New test cases for invalid parameters and edge cases
-
     describe('invalid buffer parameter', () => {
         const schema: StructSchemaInterface = {
             id: 'UInt32LE',
@@ -191,9 +187,7 @@ describe('Struct.toObject', () => {
         describe('arrays of primitives', () => {
             test('should handle arrays of numeric primitives', () => {
                 const schema: StructSchemaInterface = {
-                    // @ts-expect-error - Complex array type not properly recognized by TypeScript
                     bytes: { type: 'UInt8', arraySize: 4 },
-                    // @ts-expect-error - Complex array type not properly recognized by TypeScript
                     ints: { type: 'Int32LE', arraySize: 2 }
                 };
 
@@ -220,7 +214,6 @@ describe('Struct.toObject', () => {
 
             test('should handle empty arrays', () => {
                 const schema: StructSchemaInterface = {
-                    // @ts-expect-error - Complex array type not properly recognized by TypeScript
                     emptyArray: { type: 'UInt8', arraySize: 0 }
                 };
 
@@ -296,7 +289,6 @@ describe('Struct.toObject', () => {
                 };
 
                 const struct = new Struct<any>(schema);
-                // Each string has UInt16LE length prefix by default
                 const buffer = Buffer.alloc(50);
                 let offset = 0;
 
@@ -330,10 +322,10 @@ describe('Struct.toObject', () => {
         describe('bitfields', () => {
             test('should handle various bitfield sizes', () => {
                 const schema: StructSchemaInterface = {
-                    bit1: 'UInt8:1',    // 1 bit field
-                    bit3: 'UInt8:3',    // 3 bit field
-                    bit7: 'UInt16LE:7', // 7 bit field in 16-bit word
-                    bit12: 'UInt16BE:12' // 12 bit field in big-endian 16-bit word
+                    bit1: 'UInt8:1',
+                    bit3: 'UInt8:3',
+                    bit7: 'UInt16LE:7',
+                    bit12: 'UInt16BE:12'
                 };
 
                 const struct = new Struct<any>(schema);
@@ -343,7 +335,7 @@ describe('Struct.toObject', () => {
                 // bit1 gets 0, bit3 gets 101 = 5
                 buffer.writeUInt8(0xa, 0);
 
-                // Next two bytes (little endian): 11110000 11001100 = 0xF0CC
+                // The next two bytes (little endian): 11110000 11001100 = 0xF0CC
                 // bit7 gets 1110000 = 112
                 buffer.writeUInt16LE(0x70, 1);
 
@@ -363,7 +355,7 @@ describe('Struct.toObject', () => {
             test('should throw when extracting bits beyond field size', () => {
                 const schema: StructSchemaInterface = {
                     // @ts-expect-error - Testing invalid bitfield that exceeds UInt8 size
-                    invalid: 'UInt8:9' // 9 bits from 8-bit field (invalid)
+                    invalid: 'UInt8:9' // 9 bits from an 8-bit field (invalid)
                 };
 
                 expect(() => {
@@ -433,14 +425,14 @@ describe('Struct.toObject', () => {
             });
 
             test('should handle arrays of nested structs', () => {
-                // Create inner struct
+                // Create an inner struct
                 const pointSchema: StructSchemaInterface = {
                     x: 'Int16LE',
                     y: 'Int16LE'
                 };
                 const pointStruct = new Struct<any>(pointSchema);
 
-                // Create main struct with array of structs
+                // Create the main struct with an array of structs
                 const schema: StructSchemaInterface = {
                     count: 'UInt8',
                     points: { type: pointStruct, arraySize: 3 }
@@ -485,10 +477,8 @@ describe('Struct.toObject', () => {
                 };
 
                 const struct = new Struct<any>(schema);
-
-                // Create buffer that claims string length is 1000 but buffer is only 10 bytes
                 const buffer = Buffer.alloc(10);
-                buffer.writeUInt16LE(1000, 0); // Claim string is 1000 bytes long
+                buffer.writeUInt16LE(1000, 0);
 
                 expect(() => {
                     struct.toObject(buffer);
@@ -510,8 +500,6 @@ describe('Struct.toObject', () => {
 
             test('should validate array bounds', () => {
                 const schema: StructSchemaInterface = {
-                    // Very large array that would cause memory issues if not validated
-                    // @ts-expect-error - Testing invalid array size validation
                     hugeArray: { type: 'UInt32LE', arraySize: Number.MAX_SAFE_INTEGER }
                 };
 
@@ -654,7 +642,7 @@ describe('Struct.toBuffer', () => {
 
             expect(() => {
                 basicStruct.toBuffer({ id: 42, value: 32768, flag: 1 });
-            }).toThrow(); // Int16 max is 32767
+            }).toThrow(); // Int16 max is 32,767
 
             expect(() => {
                 basicStruct.toBuffer({ id: 42, value: 12345, flag: 2 });
@@ -982,7 +970,7 @@ describe('Struct toObject with Bitfield fields', () => {
             field1: 'Int8:4'  // 4-bit signed field
         });
 
-        // Buffer with signed 4-bit field value (binary 1100 represents -4)
+        // Buffer with a signed 4-bit field value (binary 1100 represents -4)
         const buffer = Buffer.from([ 0b1100 ]);
         const result = struct.toObject(buffer);
 
@@ -1353,14 +1341,14 @@ describe('Struct - from Buffer for all supported types', () => {
 
     test('should deserialize UInt16LE from buffer', () => {
         const struct = new Struct<{ field1: number }>({ field1: 'UInt16LE' });
-        const buffer = Buffer.from([ 0xFF, 0xFF ]); // Max value for UInt16LE (65535)
+        const buffer = Buffer.from([ 0xFF, 0xFF ]); // Max value for UInt16LE (65,535)
         const result = struct.toObject(buffer);
         expect(result.field1).toBe(65535);
     });
 
     test('should deserialize UInt16BE from buffer', () => {
         const struct = new Struct<{ field1: number }>({ field1: 'UInt16BE' });
-        const buffer = Buffer.from([ 0xFF, 0xFF ]); // Max value for UInt16BE (65535)
+        const buffer = Buffer.from([ 0xFF, 0xFF ]); // Max value for UInt16BE (65,535)
         const result = struct.toObject(buffer);
         expect(result.field1).toBe(65535);
     });
@@ -1483,12 +1471,8 @@ describe('Struct - Endianness Validation (Little Endian and Big Endian)', () => 
         };
 
         const buffer = struct.toBuffer(data);
-
-        // Validate Little Endian serialization
-        expect(buffer.slice(0, 2)).toEqual(Buffer.from([ 0x34, 0x12 ])); // 0x1234 in LE
-
-        // Validate Big Endian serialization
-        expect(buffer.slice(2, 4)).toEqual(Buffer.from([ 0x12, 0x34 ])); // 0x1234 in BE
+        expect(buffer.subarray(0, 2)).toEqual(Buffer.from([ 0x34, 0x12 ])); // 0x1234 in LE
+        expect(buffer.subarray(2, 4)).toEqual(Buffer.from([ 0x12, 0x34 ])); // 0x1234 in BE
     });
 
     test('should correctly serialize and deserialize UInt32LE and UInt32BE', () => {
@@ -1505,13 +1489,8 @@ describe('Struct - Endianness Validation (Little Endian and Big Endian)', () => 
         const buffer = struct.toBuffer(data);
         const result = struct.toObject(buffer);
 
-        // Validate Little Endian serialization
-        expect(buffer.slice(0, 4)).toEqual(Buffer.from([ 0x78, 0x56, 0x34, 0x12 ])); // LE
-
-        // Validate Big Endian serialization
-        expect(buffer.slice(4, 8)).toEqual(Buffer.from([ 0x12, 0x34, 0x56, 0x78 ])); // BE
-
-        // Validate round-trip serialization and deserialization
+        expect(buffer.subarray(0, 4)).toEqual(Buffer.from([ 0x78, 0x56, 0x34, 0x12 ])); // LE
+        expect(buffer.subarray(4, 8)).toEqual(Buffer.from([ 0x12, 0x34, 0x56, 0x78 ])); // BE
         expect(result).toEqual(data);
     });
 
