@@ -2,6 +2,7 @@
 
 [![Documentation](https://img.shields.io/badge/Documentation-orange?logo=typescript&logoColor=f5f5f5)](https://remotex-labs.github.io/xStruct/)
 [![npm version](https://img.shields.io/npm/v/@remotex-labs/xstruct.svg)](https://www.npmjs.com/package/@remotex-labs/xstruct)
+[![downloads](https://img.shields.io/npm/dm/@remotex-labs/xstruct?label=npm%20downloads)](https://www.npmjs.com/package/@remotex-labs/xstruct)
 [![License: MPL 2.0](https://img.shields.io/badge/License-MPL_2.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0)
 [![Node.js CI](https://github.com/remotex-labs/xStruct/actions/workflows/test.yml/badge.svg)](https://github.com/remotex-labs/xStruct/actions/workflows/test.yml)
 [![Discord](https://img.shields.io/discord/1364348850696884234?logo=Discord&label=Discord)](https://discord.gg/psV9grS9th)
