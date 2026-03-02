@@ -1,128 +1,128 @@
 name: Deploy
 
 on:
-    # Trigger on new GitHub releases
-    release:
-        types: [ published ]
-    # Allow manual deployment
-    workflow_dispatch:
+  # Trigger on new GitHub releases
+  release:
+    types: [ published ]
+  # Allow manual deployment
+  workflow_dispatch:
 
 # Required permissions for deployment
 permissions:
-    pages: write
-    contents: write
-    id-token: write
+  pages: write
+  contents: write
+  id-token: write
 
 # Prevent concurrent deployments
 concurrency:
-    group: deploy
-    cancel-in-progress: false
+  group: deploy
+  cancel-in-progress: false
 
 jobs:
-    publish-npm:
-        name: Publish to npm
-        runs-on: ubuntu-latest
-        if: github.event_name == 'release'
+  publish-npm:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
 
-        steps:
-            # Checkout repository code
-            -   name: Checkout
-                uses: actions/checkout@v5
+    steps:
+      # Checkout repository code
+      - name: Checkout
+        uses: actions/checkout@v5
 
-            # Setup pnpm package manager
-            -   name: Setup pnpm
-                uses: pnpm/action-setup@v4
-                with:
-                    version: latest
+      # Setup pnpm package manager
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
 
-            # Setup Node.js LTS with npm registry
-            -   name: Setup Node.js
-                uses: actions/setup-node@v6
-                with:
-                    cache: 'pnpm'
-                    node-version: 22
-                    registry-url: 'https://registry.npmjs.org'
+      # Setup Node.js LTS with npm registry
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          cache: 'pnpm'
+          node-version: 22
+          registry-url: 'https://registry.npmjs.org'
 
-            # Cache pnpm store for faster installs
-            -   name: Cache pnpm store
-                uses: actions/cache@v4
-                with:
-                    path: ~/.pnpm-store
-                    key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-                    restore-keys: |
-                        ${{ runner.os }}-pnpm-
+      # Cache pnpm store for faster installs
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
 
-            # Install dependencies
-            -   name: Install dependencies
-                run: pnpm install --frozen-lockfile --ignore-scripts
+      # Install dependencies
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
-            -   name: Run lint, typecheck and build (package)
-                run: |
-                    pnpm run lint
-                    pnpm run test
+      - name: Run lint, typecheck and build (package)
+        run: |
+          pnpm run lint
+          pnpm run test
 
-            -   name: Run npm version command
-                run: npm --no-git-tag-version version from-git
+      - name: Run npm version command
+        run: npm --no-git-tag-version version from-git
 
-            # Build the package
-            -   name: Build
-                run: pnpm run build
+      # Build the package
+      - name: Build
+        run: pnpm run build
 
-            # Publish to npm if version is new
-            -   name: Publish to npm
-                run: pnpm publish --access public --no-git-checks
-                env:
-                    NODE_AUTH_TOKEN: ${{ secrets.REMOTEX_LAB_TOKEN }}
+      # Publish to npm if version is new
+      - name: Publish to npm
+        run: pnpm publish --access public --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.REMOTEX_LAB_TOKEN }}
 
-    deploy-docs:
-        name: Deploy VitePress docs
-        runs-on: ubuntu-latest
+  deploy-docs:
+    name: Deploy VitePress docs
+    runs-on: ubuntu-latest
 
-        steps:
-            # Checkout repository code
-            -   name: Checkout
-                uses: actions/checkout@v5
+    steps:
+      # Checkout repository code
+      - name: Checkout
+        uses: actions/checkout@v5
 
-            # Setup pnpm package manager
-            -   name: Setup pnpm
-                uses: pnpm/action-setup@v4
-                with:
-                    version: latest
+      # Setup pnpm package manager
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
 
-            # Setup Node.js LTS
-            -   name: Setup Node.js
-                uses: actions/setup-node@v6
-                with:
-                    node-version: 22
-                    cache: 'pnpm'
+      # Setup Node.js LTS
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: 'pnpm'
 
-            # Cache pnpm store for faster installs
-            -   name: Cache pnpm store
-                uses: actions/cache@v4
-                with:
-                    path: ~/.pnpm-store
-                    key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-                    restore-keys: |
-                        ${{ runner.os }}-pnpm-
+      # Cache pnpm store for faster installs
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
 
-            # Install dependencies
-            -   name: Install dependencies
-                run: pnpm install --frozen-lockfile --ignore-scripts
+      # Install dependencies
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
-            # Build VitePress documentation
-            -   name: Build docs
-                run: pnpm docs:build
+      # Build VitePress documentation
+      - name: Build docs
+        run: pnpm docs:build
 
-            # Setup GitHub Pages
-            -   name: Setup Pages
-                uses: actions/configure-pages@v5
+      # Setup GitHub Pages
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
 
-            # Upload docs artifact
-            -   name: Upload artifact
-                uses: actions/upload-pages-artifact@v3
-                with:
-                    path: docs/.vitepress/dist
+      # Upload docs artifact
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/.vitepress/dist
 
-            # Deploy to GitHub Pages
-            -   name: Deploy to GitHub Pages
-                uses: actions/deploy-pages@v4
+      # Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
