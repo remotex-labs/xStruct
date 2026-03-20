@@ -3,19 +3,16 @@
         "strict": true,
         "target": "ESNext",
         "module": "ESNext",
-        "baseUrl": ".",
         "outDir": "dist",
         "rootDir": "src",
         "declaration": true,
         "skipLibCheck": true,
-        "importHelpers": false,
-        "isolatedModules": false,
-        "esModuleInterop": false,
+        "esModuleInterop": true,
+        "isolatedModules": true,
         "moduleDetection": "force",
         "moduleResolution": "bundler",
         "resolveJsonModule": true,
-        "allowSyntheticDefaultImports": true,
-        "forceConsistentCasingInFileNames": true,
+        "emitDeclarationOnly": true,
         "lib": [
             "DOM",
             "ESNext"
@@ -25,10 +22,10 @@
         ],
         "paths": {
             "@components/*": [
-                "src/components/*"
+                "./src/components/*"
             ],
             "@services/*": [
-                "src/services/*"
+                "./src/services/*"
             ]
         }
     },
