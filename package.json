@@ -7,8 +7,9 @@
     "author": "Garefild",
     "version": "1.0.0-local",
     "license": "Mozilla Public License Version 2.0",
-    "description": "This library provides a simple way to define and serialize data structures (structs) with support for both regular fields and bitfields",
     "homepage": "https://remotex-labs.github.io/xStruct",
+    "description": "This library provides a simple way to define and serialize data structures (structs) with support for both regular fields and bitfields",
+    "sideEffects": false,
     "repository": {
         "type": "git",
         "url": "git+https://github.com/remotex-labs/xStruct.git"
@@ -31,16 +32,10 @@
         "node": ">=20"
     },
     "exports": {
-        "./package.json": "./package.json",
         ".": {
-            "import": {
-                "types": "./dist/index.d.ts",
-                "default": "./dist/esm/index.js"
-            },
-            "require": {
-                "types": "./dist/index.d.ts",
-                "default": "./dist/cjs/index.js"
-            }
+            "types": "./dist/index.d.ts",
+            "import": "./dist/esm/index.js",
+            "require": "./dist/cjs/index.js"
         }
     },
     "files": [
@@ -49,20 +44,24 @@
         "README.md"
     ],
     "scripts": {
-        "dev": "xBuild -w",
-        "test": "xjet",
-        "build": "xBuild",
-        "test:coverage": "xjet --coverage",
-        "lint": "pnpm run lint:md && pnpm run lint:eslint && pnpm run lint:typescript",
-        "lint:md": "markdownlint \"**/*.md\" \".github/**/*.md\" --ignore \"node_modules/**\"",
-        "lint:eslint": "eslint . -c ./eslint.config.mjs",
-        "lint:typescript": "xbuild --tc",
-        "ci:test": "xjet",
-        "ci:clean": "rm -rf ./dist",
-        "ci:build": "pnpm run build",
-        "docs:dev": "vitepress dev docs",
-        "docs:build": "vitepress build docs",
-        "docs:preview": "vitepress preview docs"
+        "dev":              "xBuild -w",
+        "build":            "xBuild",
+        "build:clean":      "rm -rf ./dist && xBuild",
+
+        "test":             "xjet",
+        "test:coverage":    "xjet --coverage",
+
+        "lint":             "pnpm lint:md && pnpm lint:eslint && pnpm lint:typescript",
+        "lint:md":          "markdownlint \"**/*.md\" --ignore node_modules",
+        "lint:eslint":      "eslint . -c ./eslint.config.mjs",
+        "lint:typescript":  "xBuild --tc",
+
+        "docs:dev":         "vitepress dev docs",
+        "docs:build":       "vitepress build docs",
+        "docs:preview":     "vitepress preview docs",
+
+        "ci":              "pnpm lint && pnpm test && pnpm build:clean",
+        "prepublishOnly":  "pnpm build:clean && pnpm lint && pnpm test"
     },
     "devDependencies": {
         "eslint": "^10.0.3",
