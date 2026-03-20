@@ -13,7 +13,7 @@ export default defineVersionedConfig({
     base: '/xStruct/',
     description: 'A binary Serialization Library for TypeScript',
     head: [
-        [ 'link', { rel: 'icon', type: 'image/png', href: '/xStruct/xStruct.png' }],
+        [ 'link', { rel: 'icon', type: 'image/png', href: '/xStruct/logo.png' }],
         [ 'meta', { name: 'theme-color', content: '#ff7e17' }],
         [ 'script', { async: '', src: 'https://www.googletagmanager.com/gtag/js?id=G-C30TKES06G' }],
         [
