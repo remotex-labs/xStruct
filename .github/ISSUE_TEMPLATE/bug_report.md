@@ -1,43 +1,43 @@
 ---
 name: 🐞 Bug Report
-about: Report a bug or regression in @remotex-labs/xstruct
-title: "[BUG] "
-labels: bug
-assignees: ''
+title: 🐞 Bug Report
+about: Something is broken
+labels: [ "bug", "needs triage" ]
 ---
 
-## Description
+**Describe the bug**
+A clear and concise description of what the bug is.
 
-<!-- A clear and concise description of what the bug is -->
+**Reproduction**
 
-Select the type of issue:
+```typescript
+// Minimal code that reproduces the issue
+import {} from '@remotex-labs/xstruct';
+```
 
-- [ ] Bug report
-- [ ] Feature request
-- [ ] Usage question
+**Expected behavior**
+What you expected to happen.
 
-## Steps to Reproduce
+**Actual behavior**
+What actually happened. 
+Include the full error message and stack trace if applicable.
 
-<!-- Steps to reproduce the behavior -->
+```
+Error: ...
+    at ...
+```
 
-## Expected Behavior
+**Environment**
 
-<!-- What you expected to happen -->
+|                               | |
+|-------------------------------|-|
+| `@remotex-labs/xansi` version | |
+| OS                            | |
+| Bundler                       | |
+| Node.js version               | |
 
-## Package Version
+**Checklist**
 
-<!-- Which version of@remotex-labs/xbuild are you using? e.g., 1.2.3 -->
-
-**Version:**
-
-## Environment
-
-<!-- Information about your environment -->
-
-- **Node.js version:**
-- **pnpm / npm version:**
-- **Operating System:**
-
-## Additional Context
-
-<!-- Add any other context about the problem here (logs, screenshots, etc.) -->
+- [ ] I have searched for existing issues, and this is not a duplicate
+- [ ] I am using the latest published version
+- [ ] I have included a minimal reproduction above
