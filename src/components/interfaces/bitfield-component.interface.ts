@@ -31,7 +31,6 @@ import type { PositionedDescriptorInterface } from '@components/interfaces/primi
  * type Positions = { [K in EnumerateType<3>]: string }; // { 0: string; 1: string; 2: string }
  * ```
  *
- * @internal
  * @since 2.0.0
  */
 
