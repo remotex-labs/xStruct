@@ -474,7 +474,7 @@ console.log(mixedUnion.size);  // 12
 // Different message types sharing a buffer
 interface PingMessage {
     type: number;
-    timestamp: number;
+    timestamp: bigint;
 }
 
 interface DataMessage {
@@ -484,7 +484,7 @@ interface DataMessage {
 
 const pingStruct = new Struct<PingMessage>({
     type: 'UInt8',
-    timestamp: 'UInt32LE'
+    timestamp: 'BigUInt64LE'
 });
 
 const dataStruct = new Struct<DataMessage>({
@@ -504,7 +504,7 @@ const messageUnion = new Union<Message>({
 
 // Send ping
 const pingBuf = messageUnion.toBuffer({
-    ping: { type: 1, timestamp: Date.now() }
+    ping: { type: 1, timestamp: BigInt(Date.now()) }
 });
 
 // Send data
