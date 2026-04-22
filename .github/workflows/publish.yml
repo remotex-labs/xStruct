@@ -39,7 +39,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           cache: 'pnpm'
-          node-version: 22
+          node-version: '24'
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
@@ -47,5 +47,3 @@ jobs:
 
       - name: Publish
         run: pnpm publish --access public --no-git-checks --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.REMOTEX_LAB_TOKEN }}
