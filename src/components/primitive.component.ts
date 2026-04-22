@@ -58,7 +58,7 @@ export const PRIMITIVE_TYPE_SIZES: Record<PrimitiveType | FloatPrimitiveType, nu
     'BigInt64BE': 64,
     'BigUInt64LE': 64,
     'BigUInt64BE': 64
-};
+} as const;
 
 /**
  * Parses a string representation of a primitive type descriptor into a structured positioned object
