@@ -4,7 +4,10 @@
 
 import type { PrimitiveType, PrimitiveDataType } from '@components/interfaces/primitive-component.interface';
 import type { PositionedPrimitiveDescriptorType } from '@components/interfaces/primitive-component.interface';
-import type { FloatPrimitiveType, PrimitiveContextInterface } from '@components/interfaces/primitive-component.interface';
+import type {
+    FloatPrimitiveType,
+    PrimitiveContextInterface
+} from '@components/interfaces/primitive-component.interface';
 
 /**
  * Imports
@@ -107,7 +110,7 @@ export const PRIMITIVE_TYPE_SIZES: Record<PrimitiveType | FloatPrimitiveType, nu
 
 export function parsePrimitiveDescriptor(field: string, position: number = 0): PositionedPrimitiveDescriptorType {
     const pattern = /^([A-Za-z][A-Za-z0-9]*)(?:\[(\d+)\])?$/i;
-    const match = <[string, PrimitiveType, string]> field.match(pattern);
+    const match = <[ string, PrimitiveType, string ]>field.match(pattern);
 
     if (!match)
         throw new Error(`Invalid primitive descriptor: ${ field }`);
@@ -254,7 +257,7 @@ export function readPrimitiveArray(this: PrimitiveContextInterface): Array<bigin
  */
 
 export function readPrimitive(this: PrimitiveContextInterface): PrimitiveDataType {
-    if(('arraySize' in this.descriptor) && this.descriptor.arraySize)
+    if (('arraySize' in this.descriptor) && this.descriptor.arraySize)
         return readPrimitiveArray.call(this);
 
     return readSinglePrimitive.call(this);
@@ -313,7 +316,7 @@ export function writeSinglePrimitive(this: PrimitiveContextInterface, value: num
     const { position, type } = this.descriptor;
     const isBigIntType = type.includes('Big');
 
-    if(isBigIntType && value === 0)
+    if (isBigIntType && value === 0)
         value = BigInt(0);
 
     if (isBigIntType && typeof value !== 'bigint')
@@ -375,6 +378,58 @@ export function writePrimitiveArray(this: PrimitiveContextInterface, values: Arr
 }
 
 /**
+ * Normalizes primitive data into a consistent array format
+ *
+ * @param value - A primitive value that can be a single number, bigint, or an existing array of numbers/bigint
+ * @returns An array containing the primitive value(s)
+ *
+ * @remarks
+ * This function provides a unified interface for handling mixed primitive data types by converting
+ * them into a consistent array representation. It's useful when you need to process primitive values
+ * uniformly, regardless of whether they arrive as scalars or arrays.
+ *
+ * The function recognizes three input patterns:
+ * 1. **ArrayBufferView instances** (e.g., `Uint8Array`, `Int32Array`) — returned as-is cast to the target type
+ * 2. **Native JavaScript arrays** — returned as-is cast to the target type
+ * 3. **Scalar primitives** (number or bigint) — wrapped in a single-element array
+ *
+ * **Performance Note:**
+ * When the input is already an array or ArrayBufferView, the function returns it without copying,
+ * making it efficient for batch operations on pre-allocated typed arrays.
+ *
+ * @example
+ * ```ts
+ * // Scalar number → wrapped in an array
+ * const result1 = normalizePrimitiveArray(42);
+ * // Returns: [42]
+ *
+ * // Existing array → returned as-is
+ * const result2 = normalizePrimitiveArray([1, 2, 3]);
+ * // Returns: [1, 2, 3]
+ *
+ * // Typed array (ArrayBufferView) → returned as-is
+ * const uint8 = new Uint8Array([255, 128, 64]);
+ * const result3 = normalizePrimitiveArray(uint8);
+ * // Returns: Uint8Array [255, 128, 64]
+ *
+ * // BigInt scalar → wrapped in an array
+ * const result4 = normalizePrimitiveArray(BigInt('9223372036854775807'));
+ * // Returns: [9223372036854775807n]
+ * ```
+ *
+ * @see readPrimitive
+ * @since 2.0.0
+ */
+
+export function normalizePrimitiveArray(value: PrimitiveDataType): Array<number | bigint> {
+    // Todo add casting and custom support for Uin<8,16,32, 64>Array to it can detect that it uint8 and pass array of Uint32
+    // and cast or throw error
+    if (ArrayBuffer.isView(value) || Array.isArray(value)) return value as Array<number | bigint>;
+
+    return [ value ];
+}
+
+/**
  * Writes primitive data to the buffer based on the context's descriptor
  *
  * @param value - A primitive value or array of primitive values (number|bigint or (number|bigint)[])
@@ -420,8 +475,9 @@ export function writePrimitiveArray(this: PrimitiveContextInterface, values: Arr
  */
 
 export function writePrimitive(this: PrimitiveContextInterface, value: PrimitiveDataType): void {
-    if(('arraySize' in this.descriptor) && this.descriptor.arraySize)
-        return writePrimitiveArray.call(this, Array.isArray(value) ? value : [ value ]);
+    if (('arraySize' in this.descriptor) && this.descriptor.arraySize) {
+        return writePrimitiveArray.call(this, normalizePrimitiveArray(value));
+    }
 
     writeSinglePrimitive.call(this, Array.isArray(value) ? (value[0] || 0) : value);
 }
