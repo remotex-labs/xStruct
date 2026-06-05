@@ -4,7 +4,8 @@
         "target": "ESNext",
         "module": "ESNext",
         "outDir": "dist",
-        "rootDir": "src",
+        "rootDir": ".",
+        "composite": false,
         "declaration": true,
         "skipLibCheck": true,
         "esModuleInterop": true,
@@ -21,11 +22,23 @@
             "node"
         ],
         "paths": {
-            "@components/*": [
-                "./src/components/*"
+            "@pipes/*": [
+                "./src/pipes/*"
+            ],
+            "@errors/*": [
+                "./src/errors/*"
             ],
             "@services/*": [
                 "./src/services/*"
+            ],
+            "@constants/*": [
+                "./src/constants/*"
+            ],
+            "@components/*": [
+                "./src/components/*"
+            ],
+            "@interfaces/*": [
+                "./src/interfaces/*"
             ]
         }
     },
@@ -35,8 +48,9 @@
     "exclude": [
         "dist",
         "node_modules",
-        "**/*.spec.ts",
-        "xbuild.cjs.ts",
-        "xbuild.config.ts"
+        "**/*.spec.ts"
+    ],
+    "references": [
+        { "path": "./tsconfig.spec.json" }
     ]
 }

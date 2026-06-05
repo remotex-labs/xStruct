@@ -61,15 +61,15 @@
         "docs:preview":     "vitepress preview docs"
     },
     "devDependencies": {
-        "eslint": "^10.2.1",
-        "vitepress": "^2.0.0-alpha.15",
+        "eslint": "^10.4.1",
+        "vitepress": "^2.0.0-alpha.17",
         "markdownlint-cli": "^0.48.0",
-        "typescript-eslint": "^8.59.0",
+        "typescript-eslint": "^8.60.1",
         "eslint-plugin-tsdoc": "^0.5.0",
         "eslint-plugin-perfectionist": "^5.9.0",
-        "@types/node": "^25.6.0",
+        "@types/node": "^25.9.1",
         "@remotex-labs/xjet": "^1.5.4",
         "@viteplus/versions": "^2.0.6",
-        "@remotex-labs/xbuild": "^2.4.0"
+        "@remotex-labs/xbuild": "^2.5.1"
     }
 }

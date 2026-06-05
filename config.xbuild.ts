@@ -1,5 +1,5 @@
 /**
- * Import will remove at compile time
+ * Type-only imports erased during TypeScript compilation.
  */
 
 import type { xBuildConfig } from '@remotex-labs/xbuild';
@@ -25,6 +25,7 @@ export const config: xBuildConfig = {
             packages: 'external',
             sourcemap: true,
             sourceRoot: `https://github.com/remotex-labs/xStruct/tree/v${ pkg.version }/`,
+            legalComments: 'none',
             entryPoints: {
                 'index': 'src/index.ts'
             }
