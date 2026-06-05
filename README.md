@@ -8,208 +8,244 @@
 [![Discord](https://img.shields.io/discord/1364348850696884234?logo=Discord&label=Discord)](https://discord.gg/psV9grS9th)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/remotex-labs/xStruct)
 
-A TypeScript library for defining, serializing, and deserializing binary data structures with support for primitive types, bitfields, arrays, and nested structures.
+A TypeScript library for defining, serializing, and deserializing binary data structures. Describe a layout once
+with a plain object and short field strings such as `u32le`, `f64be`, or `utf8[32]`, then convert between
+JavaScript objects and `Buffer` with full type safety.
 
-This library provides a simple way to define and serialize data structures (structs) with support for both regular fields and bitfields.  
-The library supports nested structs, allowing complex data structures to be serialized and deserialized easily.  
-It is designed to work with binary buffers for use in scenarios like network protocols, binary file formats, or low-level data manipulation.
+It is designed for binary file formats, network protocols, and low-level data manipulation, with support for
+primitive types, bitfields, fixed and pointer arrays, nested structs, unions, and variable-length data stored on
+a heap.
 
 ## Key Features
 
-- **Powerful**: Handle complex binary structures with minimal code
-- **Type-safe**: Full TypeScript support with interface validation
-- **Flexible**: Support for primitive types, strings, arrays, and nested structures
-
-## Core Types
-
-### Integer Types
-
-| Type             | Description                         | Range                           |
-|------------------|-------------------------------------|---------------------------------|
-| **Unsigned**     |                                     |                                 |
-| `UInt8`          | 8-bit unsigned                      | 0 to 255                        |
-| `UInt16LE/BE`    | 16-bit unsigned (little/big endian) | 0 to 65,535                     |
-| `UInt32LE/BE`    | 32-bit unsigned (little/big endian) | 0 to 4,294,967,295              |
-| `BigUInt64LE/BE` | 64-bit unsigned (little/big endian) | 0 to 2^64-1                     |
-| **Signed**       |                                     |                                 |
-| `Int8`           | 8-bit signed                        | -128 to 127                     |
-| `Int16LE/BE`     | 16-bit signed (little/big endian)   | -32,768 to 32,767               |
-| `Int32LE/BE`     | 32-bit signed (little/big endian)   | -2,147,483,648 to 2,147,483,647 |
-| `BigInt64LE/BE`  | 64-bit signed (little/big endian)   | -2^63 to 2^63-1                 |
-
-### Floating Point Types
-
-- `FloatLE/BE`: 32-bit floating point (little/big endian)
-- `DoubleLE/BE`: 64-bit floating point (little/big endian)
-
-### String Types
-
-- `string`: Default UTF-8 with length prefix
-- `ascii`: ASCII encoding
-- `utf8`: Explicit UTF-8 encoding
-
-### Bitfields
-
-Defined as `Type:BitCount` (e.g., `UInt8:3` for 3 bits from an 8-bit unsigned integer).
-
-Supported formats:
-
-- 8-bit: `UInt8:1` to `UInt8:8`, `Int8:1` to `Int8:8`
-- 16-bit: `UInt16LE/BE:1` to `UInt16LE/BE:16`, `Int16LE/BE:1` to `Int16LE/BE:16`
+- **Declarative schemas**: describe a layout with a plain object and concise field strings.
+- **Type-safe**: parameterize a struct with an interface and let TypeScript check what you encode and decode.
+- **Rich numeric types**: 8/16/32/64-bit integers (64-bit as `bigint`) and 32/64-bit floats, each with explicit endianness.
+- **Strings and arrays**: fixed-size strings, multi-dimensional arrays, and variable-length text on the heap.
+- **Heap pointers**: variable-length fields live behind a pointer, with a configurable 1, 2, 4, 6, or 8-byte pointer size.
+- **Bitfields and unions**: pack sub-byte fields into a shared container and overlap members at offset 0.
 
 ## Installation
 
 ```bash
 npm install @remotex-labs/xstruct
 # or
+pnpm add @remotex-labs/xstruct
+# or
 yarn add @remotex-labs/xstruct
 ```
 
-## Usage
+xStruct requires Node.js 22 or later and has no runtime dependencies.
 
-### Basic Struct Definition
+## Quick start
 
 ```ts
 import { Struct } from '@remotex-labs/xstruct';
 
-const headerStruct = new Struct({
-  version: 'UInt8',
-  flags: 'UInt16LE',
-  messageType: 'UInt8:4',  // 4-bit field
-  priority: 'UInt8:4'      // 4-bit field
+interface Header {
+    magic: number;
+    version: number;
+    name: string;
+}
+
+const header = new Struct<Header>({
+    magic: 'u32be',   // unsigned 32-bit, big-endian
+    version: 'u16le', // unsigned 16-bit, little-endian
+    name: '*utf8'     // pointer to a heap UTF-8 string
 });
 
-// Serialize data
-const buffer = headerStruct.toBuffer({
-  version: 1,
-  flags: 0x0203,
-  messageType: 3,
-  priority: 2
-});
-
-// Deserialize data
-const data = headerStruct.toObject(buffer);
+const buffer = header.toBuffer({ magic: 0xCAFEBABE, version: 1, name: 'demo' });
+const data = header.toObject(buffer);
+// { magic: 3405691582, version: 1, name: 'demo' }
 ```
 
-### String Configuration Options
+Pass an interface as the type parameter (`new Struct<Header>(...)`) and TypeScript checks the objects you pass to
+`toBuffer` and the shape returned by `toObject`.
 
-- `string`: Default string encoding UTF-8
-- `ascii`: ASCII-encoded strings
-- `utf8`: UTF-8 encoded strings
+## Field strings
 
-#### String and string arrays can be defined by appending the array size in square brackets:
+Every field is described by a short expression string. Fields are laid out in declaration order with no alignment
+padding.
+
+| Form          | Example      | Meaning                                |
+|---------------|--------------|----------------------------------------|
+| Primitive     | `'u32le'`    | A single integer or float              |
+| String        | `'utf8[16]'` | A fixed-size string of N bytes         |
+| Array         | `'u8[4]'`    | A fixed array, repeats as `'u8[4][2]'` |
+| Bitfield      | `'u8:4'`     | A sub-byte field in a container        |
+| Pointer       | `'*utf8'`    | A heap pointer to variable-length data |
+| Nested struct | a `Struct`   | An embedded struct or union            |
+
+## Core types
+
+### Integers
+
+A name is `u`/`i` (unsigned/signed) + width + endianness (`le`/`be`, omitted for 8-bit).
+
+| Type             | Bytes | JS type  | Range                     |
+|------------------|-------|----------|---------------------------|
+| `u8` / `i8`      | 1     | `number` | 0..255 / -128..127        |
+| `u16le`, `u16be` | 2     | `number` | 0..65535                  |
+| `i16le`, `i16be` | 2     | `number` | -32768..32767             |
+| `u32le`, `u32be` | 4     | `number` | 0..4294967295             |
+| `i32le`, `i32be` | 4     | `number` | -2147483648..2147483647   |
+| `u64le`, `u64be` | 8     | `bigint` | 0..2^64-1                 |
+| `i64le`, `i64be` | 8     | `bigint` | -2^63..2^63-1             |
+
+64-bit fields read and write `bigint`; passing a `number` throws at encode time. Out-of-range values are not
+clamped and throw from the buffer layer.
+
+### Floats
+
+`f32le` / `f32be` (32-bit) and `f64le` / `f64be` (64-bit). All read and write `number`.
+
+### Strings
+
+Encodings: `utf8`, `ascii`, `latin1`, `utf16le`.
 
 ```ts
 new Struct({
-    a: 'string',     // Single string with default encoding
-    b: 'ascii',      // Single ASCII-encoded string
-    c: 'utf8',       // Single UTF-8 encoded string
-    d: 'string[2]',  // Array of 2 strings with default encoding
-    e: 'ascii[5]',   // Array of 5 ASCII-encoded strings
-    f: 'utf8[8]'     // Array of 8 UTF-8 encoded strings
+    code: 'ascii[4]', // fixed 4 bytes, inline on the stack (zero-padded / truncated)
+    name: '*utf8'     // variable-length, stored on the heap behind a pointer
 });
 ```
 
-> **Note**: When using string arrays, the data you provide must match the array length specified in the schema.
-> Each element in the array is independently serialized with its own length prefix (UInt16LE).
+A fixed `encoding[N]` size is a number of **bytes**, not characters. Variable-length (`*`) strings have no fixed
+size and never truncate; their payload is sized by its encoded byte length, so multi-byte UTF-8/UTF-16 round-trips
+intact.
 
-#### Fixed-Size Strings
+### Bitfields
+
+`type:bits` packs a sub-byte integer into the named container. Allowed containers are `u8`/`i8` (8 bits),
+`u16le/be` & `i16le/be` (16 bits), and `u32le/be` & `i32le/be` (32 bits). 64-bit containers are not allowed.
 
 ```ts
-const fixedStruct = new Struct({
-  name: { type: 'ascii', size: 10 },  // 10 bytes, padded or truncated
-  description: { type: 'utf8', size: 32 }  // 32 bytes, padded or truncated
+const reg = new Struct({
+    flags: 'u8:4',
+    mode: 'u8:2',
+    extra: 'u8:2' // all three share one byte
 });
 ```
 
-#### Length-Prefixed Strings
+Consecutive bitfields pack into the same container until the bit count would overflow it, the type/size changes,
+or a regular field closes it.
 
-- `UInt8`: 1-byte prefix (strings up to 255 bytes)
-- `UInt16LE`/`UInt16BE`: 2-byte prefix (strings up to 65,535 bytes)
-- `UInt32LE`/`UInt32BE`: 4-byte prefix (strings up to 4GB)
+## Arrays
+
+Append `[N]` for a fixed inline array. A fixed string takes two dimensions `encoding[bytes][count]`. Prefix with
+`*` for an array of pointers, each addressing its own heap payload.
 
 ```ts
-const prefixedStruct = new Struct({
-  shortText: { type: 'utf8', lengthType: 'UInt8' },       // Max 255 bytes
-  mediumText: { type: 'utf8', lengthType: 'UInt16LE' }    // Max 65,535 bytes
+new Struct<{ ints: number[]; codes: string[]; tags: string[] }>({
+    ints: 'u16le[4]',    // 4 inline u16le values
+    codes: 'ascii[4][2]', // 2 strings, 4 bytes each, inline
+    tags: '*utf8[3]'     // 3 pointer slots, each to a heap string
 });
 ```
 
-#### Null-Terminated Strings
+### Grouped pointers
+
+Parentheses group a fixed inner dimension behind a pointer, so `*(T[N])` is **one** pointer to a heap list of
+`T[N]` groups. Add an outer `[M]` for `M` such pointers. Pass the values inside an array and read the same array
+back; a single-element list reads back as the lone element (the usual pointer collapse).
 
 ```ts
-const nullTermStruct = new Struct({
-  cString: { type: 'utf8', nullTerminated: true },
-  limitedString: { type: 'ascii', nullTerminated: true, maxLength: 100 }
+const s = new Struct<{ rows: string[]; matrix: number[][][] }>({
+    rows: '*(utf8[4])',     // 1 pointer → heap list of 4-byte strings
+    matrix: '*(u32le[4])[2]' // 2 pointers, each → heap list of u32le[4] groups
 });
+
+s.toObject(s.toBuffer({
+    rows: [ 'ABCD', 'EFGH' ],
+    matrix: [ [ [ 1, 2, 3, 4 ], [ 5, 6, 7, 8 ] ], [ [ 9, 8, 7, 6 ] ] ]
+}));
+// rows:   [ 'ABCD', 'EFGH' ]
+// matrix: [ [ [ 1, 2, 3, 4 ], [ 5, 6, 7, 8 ] ], [ 9, 8, 7, 6 ] ]  // last slot's 1-element list collapsed
 ```
 
-> **Note**: When writing strings, use the `nullTerminated` option with `maxLength` to limit string length during serialization only.
-> This doesn't affect the buffer size calculation or reading.
-> If a null terminator is not found within the specified `maxLength` when reading, an error will be thrown.
+## Nested structs
 
-### Arrays
+Compose structs to any depth by using a `Struct` as a field value.
 
 ```ts
-const arrayStruct = new Struct({
-  // Array of 8 Int32LE values
-  intValues: 'Int32LE[8]',
-  
-  // Alternative syntax
-  bigIntValues: { type: 'BigUInt64BE', arraySize: 12 }
+const Point = new Struct<{ x: number; y: number }>({ x: 'i32le', y: 'i32le' });
+
+const Shape = new Struct<{ kind: number; origin: { x: number; y: number } }>({
+    kind: 'u8',
+    origin: Point // embedded struct, shares the parent's heap
 });
 ```
 
-### Nested Structs
+## Unions
+
+`Union` lays every member at offset 0 and sizes itself to the widest member. It extends `Struct`, shares the same
+API, and (unlike fixed-width unions) accepts pointer members because a pointer is a fixed-size slot.
 
 ```ts
-// Define a Point struct
-const PointStruct = new Struct({
-  x: 'Int32LE',
-  y: 'Int32LE'
+import { Union } from '@remotex-labs/xstruct';
+
+const value = new Union<{ word: number; text: string }>({
+    word: 'u32le',
+    text: '*utf8' // a heap pointer is a valid union member
 });
 
-// Create a struct with nested struct array
-const shapeStruct = new Struct({
-  type: 'UInt8',
-  name: 'string',
-  points: { type: PointStruct, arraySize: 10 },  // Array of 10 Points
-  points: PointStruct  // single element
-});
+value.size; // 4, the widest member
 ```
 
-## Type-Safe Usage with TypeScript
+## Heap & pointers
+
+A struct has a fixed `size` (the stack). Pointer fields (`*`) reserve one `pointerSize`-byte slot there and write
+their payload to a heap region appended after the struct, so a serialized buffer can be larger than `size`.
 
 ```ts
-interface Point {
-  x: number;
-  y: number;
-}
-
-interface Shape {
-  type: number;
-  name: string;
-  points: Point[];
-}
-
-const shapeStruct = new Struct<Shape>({
-  type: 'UInt8',
-  name: 'string',
-  points: { type: PointStruct, arraySize: 10 }
-});
-
-// TypeScript now enforces correct property types
-const shape: Shape = {
-  type: 1,
-  name: "Triangle",
-  points: [
-    { x: 0, y: 0 },
-    { x: 10, y: 0 },
-    { x: 5, y: 8 },
-    // ... padded to 10 points
-  ]
-};
+const s = new Struct<{ id: number; name: string }>({ id: 'u32le', name: '*utf8' });
+s.size; // 8  (4 for id + 4 for the pointer)
+const buf = s.toBuffer({ id: 1, name: 'Ada Lovelace' });
+buf.byteLength; // > 8: the trailing bytes are the heap
 ```
+
+A short string such as `'Ada'` may fit entirely in the spare bits of the pointer, in which case no heap bytes are
+added and the buffer stays exactly `size` long. The decoded value is identical either way.
+
+### Options
+
+`new Struct<T>(definition, options?)`:
+
+| Option        | Default | Description                                                                      |
+|---------------|---------|----------------------------------------------------------------------------------|
+| `pointerSize` | `4`     | Pointer width in bytes: `1`, `2`, `4`, `6`, or `8`. Bounds the heap size.        |
+| `inherit`     | `true`  | When nested, adopt the parent's pointer size and heap. `false` stays standalone. |
+| `heap`        | -       | A heap to write into instead of a per-call one.                                  |
+
+A custom heap is any object with `read`/`write` methods. The package exports `heapRead` / `heapWrite`, which you
+bind to a `{ top, buffer }` context:
+
+```ts
+import { Struct, heapRead, heapWrite } from '@remotex-labs/xstruct';
+
+const ctx = { top: 0, buffer: Buffer.allocUnsafe(0) };
+const heap = { read: heapRead.bind(ctx), write: heapWrite.bind(ctx) };
+
+const a = new Struct<{ v: string }>({ v: '*utf8' }, { heap, inherit: false });
+a.toBuffer({ v: 'alpha' }); // 'alpha' written into ctx.buffer
+```
+
+## Error handling
+
+Invalid schemas throw when the `Struct` is constructed, so mistakes surface before the first serialize.
+
+```ts
+const s = new Struct({ id: 'u32le' });
+
+s.toObject(Buffer.alloc(2)); // throws: buffer smaller than the struct size
+s.toBuffer(null as never);   // throws: data is not an object
+new Struct({ x: 'u9le' });   // throws at construction: unknown type
+```
+
+## Documentation
+
+Full guides and the complete type reference live at
+**[remotex-labs.github.io/xStruct](https://remotex-labs.github.io/xStruct/)**.
 
 ## Contributing
 
