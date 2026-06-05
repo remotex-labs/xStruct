@@ -18,19 +18,19 @@ Big-endian stores the most significant byte first, which is the order used by mo
 Every multi-byte type carries the suffix. There is no implicit platform default.
 
 ```text
-'UInt16LE'    'UInt16BE'
-'Int32LE'     'Int32BE'
-'BigUInt64LE' 'BigUInt64BE'
-'FloatLE'     'FloatBE'
-'DoubleLE'    'DoubleBE'
+'u16le'  'u16be'
+'i32le'  'i32be'
+'u64le'  'u64be'
+'f32le'  'f32be'
+'f64le'  'f64be'
 ```
 
-`UInt8` and `Int8` are a single byte and take no suffix.
+`u8` and `i8` are a single byte and take no suffix.
 
 ```ts
 import { Struct } from '@remotex-labs/xstruct';
 
-const s = new Struct<{ n: number }>({ n: 'UInt32BE' });
+const s = new Struct<{ n: number }>({ n: 'u32be' });
 s.toBuffer({ n: 0x01020304 }); // <Buffer 01 02 03 04>
 ```
 
@@ -48,8 +48,8 @@ A single struct can mix orders, which is useful when a format wraps a big-endian
 
 ```ts
 new Struct<{ magic: number; length: number }>({
-    magic: 'UInt32BE',  // big-endian marker
-    length: 'UInt32LE'  // little-endian payload length
+    magic: 'u32be',  // big-endian marker
+    length: 'u32le'  // little-endian payload length
 });
 ```
 
