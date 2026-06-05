@@ -40,7 +40,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: [ 20, 22, 24 ]
+        node: [ 22, 24 ]
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
