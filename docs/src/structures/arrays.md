@@ -1,61 +1,57 @@
 # Arrays
 
-Repeat any field a fixed number of times, either with the `[N]` suffix on a type string or with the `arraySize` option on a descriptor.
+Repeat a field a fixed number of times with the `[N]` suffix on a type string.
 
-## Syntax
+## Primitive arrays
+
+Append `[N]` to any integer or float type for a fixed inline array of `N` elements.
 
 ```ts
 import { Struct } from '@remotex-labs/xstruct';
 
-new Struct({
-    a: 'Int32LE[8]',                          // suffix form
-    b: { type: 'BigUInt64BE', arraySize: 4 }  // descriptor form
-});
-```
-
-The array passed to `toBuffer` must contain exactly N elements.
-
-## Primitive arrays
-
-```ts
-const s = new Struct<{ values: number[] }>({ values: 'UInt16LE[4]' });
+const s = new Struct<{ values: number[] }>({ values: 'u16le[4]' });
 
 s.size; // 8, which is 4 elements of 2 bytes
 s.toObject(s.toBuffer({ values: [ 1, 2, 3, 4 ] })).values; // [ 1, 2, 3, 4 ]
 ```
 
+A numeric type takes a single `[N]` dimension. The array passed to `toBuffer` should contain `N` elements.
+
 ## String arrays
 
-Each element is encoded independently. Dynamic strings keep their own length prefix.
+A fixed string takes two dimensions: `encoding[byteCapacity][count]`. The first bracket is the byte width of each element, the second is how many elements there are.
 
 ```ts
-new Struct({
-    tags: 'utf8[3]',      // 3 length-prefixed strings
-    codes: 'ascii(4)[2]'  // 2 fixed 4-byte strings
-});
+const codes = new Struct<{ list: string[] }>({ list: 'ascii[4][2]' });
+//                                                      ^^^^ ^^^
+//                                            4 bytes each, 2 elements
+
+codes.toObject(codes.toBuffer({ list: [ 'ABCD', 'EFGH' ] })).list;
+// [ 'ABCD', 'EFGH' ]
 ```
 
 See [Strings](/types/strings).
 
-## Struct arrays
+## Pointer arrays
 
-Repeat a nested struct with the `arraySize` option.
+Prefix with `*` for an array of pointers. Each slot addresses its own variable-length payload on the heap, so the elements need not be the same length.
 
 ```ts
-const Point = new Struct<{ x: number; y: number }>({ x: 'Int32LE', y: 'Int32LE' });
+const tags = new Struct<{ tags: string[] }>({ tags: '*utf8[3]' });
 
-const Path = new Struct<{ points: { x: number; y: number }[] }>({
-    points: { type: Point, arraySize: 3 } // 3 points
-});
+tags.toObject(tags.toBuffer({ tags: [ 'aa', 'bbbb', 'c' ] })).tags;
+// [ 'aa', 'bbbb', 'c' ]
 ```
 
-Embed a struct instance directly for a single value, and use `{ type, arraySize }` for an array. See [Nested Structs](/structures/nested-structs).
+The same form works for numeric pointers, for example `'*u32le[4]'` for four pointers, each to one heap `u32le`. See [Heap & Pointers](/guides/heap).
 
 ## Sizing
 
-A fixed array contributes `N * elementSize` to `size`. Arrays of dynamic strings extend the buffer beyond `size`; use the `getDynamicOffset` callback when reading them. See [Working with Buffers](/guide#working-with-buffers).
+A fixed array contributes `N * elementSize` to `size`. A pointer array contributes `N * pointerSize` to `size`;
+the payloads it references live in the heap region appended after the struct, so the buffer is larger than `size`.
 
 ## See also
 
-- [Nested Structs](/structures/nested-structs)
 - [Strings](/types/strings)
+- [Heap & Pointers](/guides/heap)
+- [Nested Structs](/structures/nested-structs)

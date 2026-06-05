@@ -20,7 +20,7 @@ yarn add @remotex-labs/xstruct
 
 :::
 
-xStruct requires Node.js 20 or later and has no runtime dependencies.
+xStruct requires Node.js 22 or later and has no runtime dependencies.
 
 ## Quick start
 
@@ -34,9 +34,9 @@ interface Header {
 }
 
 const header = new Struct<Header>({
-    magic: 'UInt32BE',   // unsigned 32-bit, big-endian   // [!code focus]
-    version: 'UInt16LE', // unsigned 16-bit, little-endian // [!code focus]
-    name: 'utf8'         // length-prefixed UTF-8 string   // [!code focus]
+    magic: 'u32be',   // unsigned 32-bit, big-endian      // [!code focus]
+    version: 'u16le', // unsigned 16-bit, little-endian   // [!code focus]
+    name: '*utf8'     // pointer to a heap UTF-8 string    // [!code focus]
 });
 
 const buffer = header.toBuffer({ magic: 0xCAFEBABE, version: 1, name: 'demo' });
@@ -46,81 +46,105 @@ const data = header.toObject(buffer);
 
 Pass an interface as the type parameter, as in `new Struct<Header>(...)`. TypeScript then checks the objects you pass to `toBuffer` and the shape returned by `toObject`.
 
-## The schema
+## Field strings
 
-A schema maps field names to field definitions. A definition is one of the following.
+Every field is described by a short expression string. The grammar is the same for every type.
 
-| Form                   | Example                             | Meaning                                 |
-|------------------------|-------------------------------------|-----------------------------------------|
-| Type string            | `'UInt32LE'`, `'utf8'`, `'UInt8:4'` | A primitive, string, array, or bitfield |
-| Descriptor object      | `{ type: 'string', size: 16 }`      | A field with extra options              |
-| Nested struct or union | a `Struct` or `Union` instance      | An embedded structure                   |
+| Form          | Example      | Meaning                                |
+|---------------|--------------|----------------------------------------|
+| Primitive     | `'u32le'`    | A single integer or float              |
+| String        | `'utf8[16]'` | A fixed-size string of N bytes         |
+| Array         | `'u8[4]'`    | A fixed array, repeats as `'u8[4][2]'` |
+| Bitfield      | `'u8:4'`     | A sub-byte field in a container        |
+| Pointer       | `'*utf8'`    | A heap pointer to variable-length data |
+| Nested struct | a `Struct`   | An embedded struct or union            |
 
-Fields are laid out in declaration order.
+`*` introduces a pointer: the field stores only a small address on the stack and its payload is written to a heap
+region appended after the struct. This is how a single struct can hold variable-length data while keeping a fixed
+`size`. See [Heap & Pointers](/guides/heap).
 
-## API
+Fields are laid out in declaration order with no alignment padding.
 
-### `new Struct<T>(schema)`
+## The `Struct` class
+
+### `new Struct<T>(definition, options?)`
 
 Compiles the schema once and exposes:
 
-| Member                                   | Description                            |
-|------------------------------------------|----------------------------------------|
-| `size: number`                           | The fixed size of the layout in bytes. |
-| `toBuffer(data: T): Buffer`              | Serializes an object into a buffer.    |
-| `toObject(buffer, getDynamicOffset?): T` | Parses a buffer into an object.        |
+| Member                                       | Description                                              |
+|----------------------------------------------|----------------------------------------------------------|
+| `size: number`                               | Fixed (stack) size of the layout in bytes.               |
+| `pointerSize: number`                        | Pointer width used for heap-backed fields.               |
+| `toBuffer(data: T, parentHeap?): Buffer`     | Serializes an object into a buffer.                      |
+| `toObject(buffer, parentHeap?): Required<T>` | Parses a buffer into an object.                          |
 
-`getDynamicOffset` is an optional callback. After decoding, it receives the number of bytes consumed, which lets you read consecutive records whose total size depends on dynamic string content.
+`size` counts only the fixed part of the layout. Pointer fields contribute one `pointerSize`-byte slot to `size`;
+the bytes they reference live in the heap region that `toBuffer` appends after the struct.
 
 ```ts
-let consumed = 0;
-header.toObject(buffer, (offset) => { consumed = offset; });
-const next = buffer.subarray(consumed);
+const point = new Struct<{ x: number; y: number }>({ x: 'i32le', y: 'i32le' });
+point.size; // 8
+
+const buf = point.toBuffer({ x: 1, y: 2 });
+point.toObject(buf); // { x: 1, y: 2 }
 ```
 
-### `new Union<T>(schema)`
+`parentHeap` is used internally when a struct is nested inside another; you rarely pass it yourself.
+See [Heap & Pointers](/guides/heap#sharing-a-heap).
 
-A `Union` lays every member at offset 0 and sizes itself to the widest member. `toBuffer` writes the first member with a defined value; `toObject` decodes every member from the same bytes. See [Unions](/structures/unions).
+### `new Struct<T>(definition, options)`
 
-### Field definitions
+| Option        | Default | Description                                                                                    |
+|---------------|---------|------------------------------------------------------------------------------------------------|
+| `pointerSize` | `4`     | Pointer width in bytes: `1`, `2`, `4`, `6`, or `8`. Bounds the heap size.                      |
+| `inherit`     | `true`  | When nested, adopt the parent's pointer size and heap. `false` stays standalone.               |
+| `heap`        | -       | A heap to write into instead of a per-call one. See [custom heap](/guides/heap#a-custom-heap). |
 
-| Definition                             | Result                                       |
-|----------------------------------------|----------------------------------------------|
-| `'UInt32LE'`, `'FloatBE'`, `'Int8'`    | A single primitive                           |
-| `'UInt8[16]'` or `{ type, arraySize }` | A fixed array                                |
-| `'UInt8:4'`                            | A bitfield                                   |
-| `'utf8'`                               | A length-prefixed string (`UInt16LE` prefix) |
-| `'utf8(16)'` or `{ type, size }`       | A fixed-size string                          |
-| `{ type, lengthType }`                 | A string with a custom length prefix         |
-| `{ type, nullTerminated, maxLength? }` | A null-terminated string                     |
-| a `Struct` instance                    | A single nested struct                       |
-| `{ type: Struct, arraySize }`          | An array of nested structs                   |
+```ts
+const wide = new Struct<{ name: string }>({ name: '*utf8' }, { pointerSize: 8 });
+wide.pointerSize; // 8
+```
 
-## Types
+## The `Union` class
 
-- [Integers](/types/integers): `UInt8` through `BigInt64BE`, with 64-bit values as `bigint`.
-- [Floats](/types/floats): `FloatLE/BE` and `DoubleLE/BE`.
-- [Strings](/types/strings): `string`, `utf8`, and `ascii`, in length-prefixed, fixed, or null-terminated layouts.
+A `Union` lays every member at offset 0 and sizes itself to the widest member. It extends `Struct`, so it shares
+the same API and can be nested in any schema. Unions support pointer (heap-backed) members, because a pointer is a
+fixed-size slot. See [Unions](/structures/unions).
+
+```ts
+import { Union } from '@remotex-labs/xstruct';
+
+const value = new Union<{ word: number; text: string }>({
+    word: 'u32le',
+    text: '*utf8'   // a heap pointer is a valid union member // [!code focus]
+});
+
+value.size; // 4, the widest member
+```
+
+## Types and structures
+
+- [Integers](/types/integers): `u8` through `i64be`, with 64-bit values as `bigint`.
+- [Floats](/types/floats): `f32le/be` and `f64le/be`.
+- [Strings](/types/strings): `utf8`, `ascii`, `latin1`, `utf16le`, fixed-size or heap-backed.
 - [Bitfields](/types/bitfields): sub-byte integers packed into a shared container.
-
-## Structures
-
 - [Arrays](/structures/arrays): fixed-length sequences of any field.
 - [Nested Structs](/structures/nested-structs): compose structs to any depth.
 - [Unions](/structures/unions): overlapping members at offset 0.
 
+## Guides
+
+- [Heap & Pointers](/guides/heap): how variable-length data is stored and addressed.
+- [Endianness](/guides/endianness): byte order, declared in every type name.
+
 ## Error handling
 
 ```ts
-const s = new Struct({ id: 'UInt32LE' });
+const s = new Struct({ id: 'u32le' });
 
 s.toObject(Buffer.alloc(2));  // throws: buffer smaller than the struct size [!code error]
 s.toBuffer(null as never);    // throws: data is not an object [!code error]
-new Struct({ x: 'UInt9LE' }); // throws at construction: invalid field type [!code error]
+new Struct({ x: 'u9le' });    // throws at construction: unknown type [!code error]
 ```
 
 Invalid schemas throw when the `Struct` is constructed, so mistakes surface before the first serialize.
-
-## Next steps
-
-- [Endianness](/guides/endianness)

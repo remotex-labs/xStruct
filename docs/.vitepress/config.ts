@@ -22,7 +22,7 @@ export default defineVersionedConfig({
         ]
     ],
     versionsConfig: {
-        current: 'v2.x.x',
+        current: 'v3.0.x',
         versionSwitcher: {
             text: 'Version',
             includeCurrentVersion: true
@@ -52,6 +52,36 @@ export default defineVersionedConfig({
 
         sidebar: {
             root: [
+                { text: 'Getting Started', link: '/guide' },
+                {
+                    text: 'Types',
+                    collapsed: false,
+                    items: [
+                        { text: 'Integers', link: '/types/integers' },
+                        { text: 'Floats', link: '/types/floats' },
+                        { text: 'Strings', link: '/types/strings' },
+                        { text: 'Bitfields', link: '/types/bitfields' }
+                    ]
+                },
+                {
+                    text: 'Structures',
+                    collapsed: false,
+                    items: [
+                        { text: 'Arrays', link: '/structures/arrays' },
+                        { text: 'Nested Structs', link: '/structures/nested-structs' },
+                        { text: 'Unions', link: '/structures/unions' }
+                    ]
+                },
+                {
+                    text: 'Guides',
+                    collapsed: false,
+                    items: [
+                        { text: 'Heap & Pointers', link: '/guides/heap' },
+                        { text: 'Endianness', link: '/guides/endianness' }
+                    ]
+                }
+            ],
+            'v2.x.x': [
                 { text: 'Getting Started', link: '/guide' },
                 {
                     text: 'Types',
