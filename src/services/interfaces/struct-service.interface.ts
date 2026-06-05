@@ -1,134 +1,64 @@
 /**
- * Import will remove at compile time
+ * Type-only imports erased during TypeScript compilation.
  */
 
-import type { Struct } from '@services/struct.service';
-import type { BitFieldType } from '@components/interfaces/bitfield-component.interface';
-import type { StringDescriptorType } from '@components/interfaces/string-component.interface';
-import type { PrimitiveArrayType } from '@components/interfaces/primitive-component.interface';
-import type { StructDescriptorInterface } from '@components/interfaces/struct-component.interface';
-import type { StringType, StringArrayType } from '@components/interfaces/string-component.interface';
-import type { BitfieldDescriptorInterface } from '@components/interfaces/bitfield-component.interface';
-import type { PositionedStringDescriptorType } from '@components/interfaces/string-component.interface';
-import type { PositionedStructDescriptorType } from '@components/interfaces/struct-component.interface';
-import type { PrimitiveDescriptorInterface } from '@components/interfaces/primitive-component.interface';
-import type { PositionedBitfieldDescriptorType } from '@components/interfaces/bitfield-component.interface';
-import type { PrimitiveType, FloatPrimitiveType } from '@components/interfaces/primitive-component.interface';
-import type { PositionedPrimitiveDescriptorType } from '@components/interfaces/primitive-component.interface';
-import type { StringFixedType, StringFixedArrayType } from '@components/interfaces/string-component.interface';
+import type { HeapRuntimeInterface, PointerSizeType } from '@interfaces/heap.interface';
 
 /**
- * Represents the various string format specifications that can be used in field definitions
- * within binary struct schemas, supporting primitive types, arrays, and bit fields.
+ * Construction options for {@link Struct} and {@link Union}.
  *
- * @see StringType
- * @see BitFieldType
- * @see PrimitiveType
- * @see StringArrayType
- * @see StringFixedType
- * @see FloatPrimitiveType
- * @see PrimitiveArrayType
- * @see StringFixedArrayType
+ * @remarks
+ * Every option is optional; an empty object yields a struct with a 4-byte pointer
+ * width that inherits its parent's context when nested.
  *
- * @since 2.0.0
+ * @example
+ * ```ts
+ * const options: StructOptionsInterface = { pointerSize: 8, inherit: false };
+ * ```
+ *
+ * @see {@link Struct}
+ *
+ * @since 3.0.0
  */
 
-export type StringFieldType =
-    | StringType
-    | BitFieldType
-    | PrimitiveType
-    | StringArrayType
-    | StringFixedType
-    | FloatPrimitiveType
-    | PrimitiveArrayType
-    | StringFixedArrayType;
+export interface StructOptionsInterface {
+    /**
+     * Externally supplied heap to write into and read from.
+     *
+     * @remarks
+     * When provided as a root, it is used instead of a per-call local heap, letting
+     * several structs pool their pointer payloads into one heap region you control.
+     *
+     * When nested, this heap is used only if {@link StructOptionsInterface.inherit} is
+     * `false`; otherwise the struct shares its parent's heap and this option is ignored.
+     *
+     * @since 3.0.0
+     */
 
-/**
- * Represents the possible field types that can be used in a descriptor definition
- * to specify the structure of binary data.
- *
- * @see StringDescriptorType
- * @see StructDescriptorInterface
- * @see BitfieldDescriptorInterface
- *
- * @since 2.0.0
- */
+    heap?: HeapRuntimeInterface;
 
-export type DescriptorFieldType =
-    | StringDescriptorType
-    | StructDescriptorInterface
-    | BitfieldDescriptorInterface
-    | PrimitiveDescriptorInterface;
+    /**
+     * Pointer width, in bytes, for heap-backed fields. Defaults to `4`.
+     *
+     * @since 3.0.0
+     */
 
-/**
- * Represents field types within a descriptor that include positioning information,
- * allowing for precise memory layout definition in binary structures.
- *
- * @see PositionedStringDescriptorType
- * @see PositionedStructDescriptorType
- * @see PositionedBitfieldDescriptorType
- * @see PositionedPrimitiveDescriptorType
- *
- * @since 2.0.0
- */
+    pointerSize?: PointerSizeType;
 
-export type PositionedDescriptorFieldType =
-    | PositionedStringDescriptorType
-    | PositionedStructDescriptorType
-    | PositionedBitfieldDescriptorType
-    | PositionedPrimitiveDescriptorType;
+    /**
+     * Whether a nested struct inherits its parent's context. Defaults to `true`.
+     *
+     * @remarks
+     * Governs both pointer size and heap when this struct is embedded as a field:
+     *
+     * - `true` (default): the struct recompiles for the parent's pointer size and
+     *   writes its pointer payloads into the parent's shared heap.
+     * - `false`: the struct keeps its own pointer size and, when a
+     *   {@link StructOptionsInterface.heap} is supplied, writes into that heap instead
+     *   of the parent's. It behaves as a standalone struct even when nested.
+     *
+     * @since 3.0.0
+     */
 
-/**
- * Represents an accumulator that tracks binary data metrics during parsing or serialization,
- * including bit and byte positions, and bitfield information.
- *
- * @see PrimitiveType
- *
- * @since 2.0.0
- */
-
-export interface AccumulatorInterface {
-    bits: number;
-    bytes: number;
-    bitFieldSize: number;
-    bitFieldType: PrimitiveType;
-}
-
-/**
- * Represents the union of all possible field types that can be used in a binary structure definition,
- * including descriptors, string fields, and complete struct definitions.
- *
- * @see Struct
- * @see StringFieldType
- * @see DescriptorFieldType
- *
- * @since 2.0.0
- */
-
-export type FieldsType = DescriptorFieldType | StringFieldType | Struct;
-
-/**
- * Defines the structure of a binary data schema as a dictionary of named fields.
- * Each field in the schema is mapped to a specific field type representation.
- *
- * @see FieldsType
- * @since 2.0.0
- */
-
-export interface StructSchemaInterface {
-    [name: string]: FieldsType;
-}
-
-/**
- * Represents the context for binary data operations, providing access to the
- * underlying buffer, current position, and type descriptor information.
- *
- * @see PositionedDescriptorFieldType
- * @since 2.0.0
- */
-
-export interface ContextInterface {
-    buffer: Buffer;
-    offset: number;
-    descriptor: PositionedDescriptorFieldType
+    inherit?: boolean;
 }
