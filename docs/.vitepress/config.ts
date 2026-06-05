@@ -23,7 +23,10 @@ export default defineVersionedConfig({
     ],
     versionsConfig: {
         current: 'v2.x.x',
-        versionSwitcher: false
+        versionSwitcher: {
+            text: 'Version',
+            includeCurrentVersion: true
+        }
     },
     themeConfig: {
         logo: '/logo.png',
@@ -35,33 +38,44 @@ export default defineVersionedConfig({
         nav: [
             { text: 'Home', link: '/' },
             { text: 'Guide', link: '/guide' },
+            {
+                text: 'Types',
+                items: [
+                    { text: 'Floats', link: '/types/floats' },
+                    { text: 'Strings', link: '/types/strings' },
+                    { text: 'Integers', link: '/types/integers' },
+                    { text: 'Bitfields', link: '/types/bitfields' }
+                ]
+            },
             { component: 'VersionSwitcher' }
         ],
 
         sidebar: {
             root: [
-                { text: 'Guide', link: '/guide' },
+                { text: 'Getting Started', link: '/guide' },
                 {
-                    text: 'Primitive',
+                    text: 'Types',
                     collapsed: false,
                     items: [
-                        { text: 'Float', link: '/primitive/float' },
-                        { text: 'Uint/Int', link: '/primitive/int' },
-                        { text: 'Strings', link: '/primitive/strings' },
-                        { text: 'Bitfields', link: '/primitive/bitfields' }
-
+                        { text: 'Integers', link: '/types/integers' },
+                        { text: 'Floats', link: '/types/floats' },
+                        { text: 'Strings', link: '/types/strings' },
+                        { text: 'Bitfields', link: '/types/bitfields' }
                     ]
                 },
                 {
-                    text: 'Advanced',
+                    text: 'Structures',
                     collapsed: false,
                     items: [
-                        { text: 'Union', link: '/advanced/union' },
-                        { text: 'Arrays', link: '/advanced/arrays' },
-                        { text: 'Endianness', link: '/advanced/endianness' },
-                        { text: 'Best practices', link: '/advanced/best-practices' },
-                        { text: 'Nested structs', link: '/advanced/nested-structs' }
+                        { text: 'Arrays', link: '/structures/arrays' },
+                        { text: 'Nested Structs', link: '/structures/nested-structs' },
+                        { text: 'Unions', link: '/structures/unions' }
                     ]
+                },
+                {
+                    text: 'Guides',
+                    collapsed: false,
+                    items: [{ text: 'Endianness', link: '/guides/endianness' }]
                 }
             ]
         },
@@ -72,8 +86,8 @@ export default defineVersionedConfig({
         ],
 
         docFooter: {
-            prev: false,
-            next: false
+            prev: true,
+            next: true
         },
         footer: {
             message: 'Released under the Mozilla Public License 2.0',
