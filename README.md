@@ -211,32 +211,15 @@ const shape: Shape = {
 };
 ```
 
-## Documentation
-
-For complete API documentation, examples, and guides, visit: [xStruct Documentation](https://remotex-labs.github.io/xStruct/)
-
-## Compatibility
-
-- Node.js 20+
-- All modern browsers (via bundlers)
-- TypeScript 4.5+
-
 ## Contributing
 
 Contributions are welcome!\
 Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
+## Links
+
+[Documentation](https://remotex-labs.github.io/xStruct/), [GitHub Repository](https://github.com/remotex-labs/xStruct), [Issue Tracker](https://github.com/remotex-labs/xStruct/issues), [npm Package](https://www.npmjs.com/package/@remotex-labs/xstruct)
+
 ## License
 
 This project is licensed under the Mozilla Public License 2.0 - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- Built with TypeScript
-
-## Links
-
-- [Documentation](https://remotex-labs.github.io/xStruct/)
-- [GitHub Repository](https://github.com/remotex-labs/xStruct)
-- [Issue Tracker](https://github.com/remotex-labs/xStruct/issues)
-- [npm Package](https://www.npmjs.com/package/@remotex-labs/xstruct)
