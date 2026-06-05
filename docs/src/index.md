@@ -1,11 +1,11 @@
 ---
 layout: home
 title: 'xStruct'
-titleTemplate: 'A binary Serialization Library for TypeScript'
+titleTemplate: 'A binary serialization library for TypeScript'
 hero:
     name: 'xStruct'
-    text: 'A binary Serialization Library for TypeScript'
-    tagline: Define, serialize, and deserialize binary data structures with full TypeScript support
+    text: 'Binary serialization for TypeScript'
+    tagline: Define a schema once, then serialize and deserialize Buffers with full type safety.
     actions:
         - theme: brand
           text: Get Started
@@ -17,22 +17,22 @@ hero:
         src: /logo.png
         alt: 'xStruct logo'
 features:
-    - icon: 🚀
-      title: Powerful & Simple
-      details: Handle complex binary structures with minimal code. Define structs once and serialize/deserialize effortlessly.
-    - icon: 🔒
-      title: Type-Safe
-      details: Full TypeScript support with interface validation ensures compile-time safety and reduces runtime errors.
-    - icon: 🔧
-      title: Flexible Types
-      details: Support for primitive types, strings (ASCII/UTF-8), arrays, bitfields, and nested structures.
-    - icon: 📦
-      title: Rich Type System
-      details: Includes integers (8/16/32/64-bit), floating points, BigInt support, and customizable endianness.
+    - icon: 🧩
+      title: Declarative schemas
+      details: Describe a layout with a plain object and concise field strings such as UInt32LE, FloatBE, or utf8(32).
+    - icon: 🛡️
+      title: Type-safe
+      details: Parameterize a struct with an interface and let TypeScript check the objects you encode and decode.
+    - icon: 🔢
+      title: Rich numeric types
+      details: 8, 16, and 32-bit integers, 64-bit BigInt, and single and double floats, each with explicit endianness.
+    - icon: 🧵
+      title: Flexible strings
+      details: Length-prefixed, fixed-size, or null-terminated strings in UTF-8 and ASCII, plus string arrays.
     - icon: ⚡
-      title: Bitfield Support
-      details: Define and manipulate bit-level fields efficiently for compact binary protocols and data formats.
-    - icon: 🌐
-      title: Zero Dependencies
-      details: Lightweight library with no external dependencies, perfect for both Node.js and browser environments.
+      title: Bitfields
+      details: Pack sub-byte fields into a shared integer container for compact protocols and registers.
+    - icon: 📦
+      title: Zero dependencies
+      details: A small library with no runtime dependencies that runs anywhere a Buffer is available.
 ---
