@@ -1,33 +1,9 @@
-## Summary
+<!-- Tip: use a Conventional Commits title (feat:, fix:, docs: ...) so a label is applied automatically. -->
 
-<!-- What does this PR do? One or two sentences. -->
+## What and why
 
-Closes #<!-- issue number -->
-
-## Type of change
-
-- [ ] 🐛 Bug fix
-- [ ] 💡 New feature
-- [ ] 💥 Breaking change
-- [ ] 📝 Documentation
-- [ ] 🔧 Refactor / cleanup
-- [ ] ⚙️ CI / build tooling
-
-## Changes
-
-<!-- What changed and why. -->
-
--
--
+<!-- What does this change do, and why is it needed? -->
 
 ## How to test
 
-1.
-2.
-
-## Checklist
-
-- [ ] `pnpm run ci` passes locally
-- [ ] Tests added for new behavior
-- [ ] TSDoc updated for any changed public API
-- [ ] `README.md` updated if public API changed
+<!-- Steps a reviewer can follow to verify the change. -->
