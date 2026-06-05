@@ -58,10 +58,7 @@
 
         "docs:dev":         "vitepress dev docs",
         "docs:build":       "vitepress build docs",
-        "docs:preview":     "vitepress preview docs",
-
-        "ci":              "pnpm lint && pnpm test && pnpm build:clean",
-        "prepublishOnly":  "pnpm lint && pnpm test && pnpm build:clean"
+        "docs:preview":     "vitepress preview docs"
     },
     "devDependencies": {
         "eslint": "^10.2.1",
