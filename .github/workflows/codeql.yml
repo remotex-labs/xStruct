@@ -1,4 +1,4 @@
-name: CodeQL
+name: Code scanning
 
 on:
   push:
@@ -6,15 +6,19 @@ on:
   pull_request:
     branches: [ master ]
   schedule:
-    - cron: '0 0 * * 1'  # every monday at 00:00 UTC
+    - cron: '0 0 * * 1' # every Monday at 00:00 UTC
 
 permissions:
   contents: read
   security-events: write
 
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   analyze:
-    name: Analyze code
+    name: CodeQL
     runs-on: ubuntu-latest
 
     steps:
@@ -26,25 +30,9 @@ jobs:
         with:
           queries: security-and-quality
           languages: javascript-typescript
+          build-mode: none
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: latest
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          cache: 'pnpm'
-          node-version: 22
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
-
-      - name: Build
-        run: pnpm run build
-
-      - name: Perform CodeQL analysis
+      - name: Analyze
         uses: github/codeql-action/analyze@v3
         with:
           category: '/language:javascript-typescript'
