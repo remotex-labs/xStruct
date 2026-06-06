@@ -18,7 +18,7 @@ Search [existing issues](https://github.com/remotex-labs/xStruct/issues) first t
 
 ## Development setup
 
-xStruct uses [pnpm](https://pnpm.io) and requires Node.js 20 or later.
+xStruct uses [pnpm](https://pnpm.io) and requires Node.js 22 or later.
 
 ```bash
 git clone https://github.com/remotex-labs/xStruct.git
