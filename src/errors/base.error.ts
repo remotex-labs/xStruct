@@ -71,15 +71,16 @@ export class xStructBaseError extends Error {
      */
 
     toJSON(): Record<string, unknown> {
-        const extra = Object.fromEntries(
-            Object.entries(this).filter(([ , v ]) => v != null)
-        );
+        const json: Record<string, unknown> = {};
+        for (const key of Object.keys(this)) {
+            const value = this[key as keyof this];
+            if (value != null) json[key] = value;
+        }
 
-        return {
-            ...extra,
-            name: this.name,
-            message: this.message,
-            stack: this.stack
-        };
+        json.name = this.name;
+        json.message = this.message;
+        json.stack = this.stack;
+
+        return json;
     }
 }
