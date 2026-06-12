@@ -57,6 +57,45 @@ describe('BaseError', () => {
             expect(serialized).toHaveProperty('message', 'Test error');
             expect(serialized).toHaveProperty('extraData', { foo: 'bar' });
         });
+
+        test('should not drop falsy custom values (false, 0, empty string)', () => {
+            const error = new xStructBaseError('Test error');
+            (error as any).retryable = false;
+            (error as any).attempts = 0;
+            (error as any).detail = '';
+            (error as any).data = undefined;
+            (error as any).nil = null;
+
+            const jsonObject = error.toJSON();
+
+            expect(jsonObject).toHaveProperty('retryable', false);
+            expect(jsonObject).toHaveProperty('attempts', 0);
+            expect(jsonObject).toHaveProperty('detail', '');
+            expect(jsonObject).not.toHaveProperty('data');
+            expect(jsonObject).not.toHaveProperty('nil');
+        });
+
+        test('should drop null and undefined custom values', () => {
+            const error = new xStructBaseError('Test error');
+            (error as any).missing = null;
+            (error as any).absent = undefined;
+
+            const jsonObject = error.toJSON();
+
+            expect(jsonObject).not.toHaveProperty('missing');
+            expect(jsonObject).not.toHaveProperty('absent');
+        });
+
+        test('should preserve falsy values through JSON.stringify', () => {
+            const error = new xStructBaseError('Test error');
+            (error as any).retryable = false;
+            (error as any).attempts = 0;
+
+            const serialized = JSON.parse(JSON.stringify(error));
+
+            expect(serialized).toHaveProperty('retryable', false);
+            expect(serialized).toHaveProperty('attempts', 0);
+        });
     });
 
     describe('inheritance', () => {
