@@ -23,10 +23,7 @@ export default defineVersionedConfig({
     ],
     versionsConfig: {
         current: 'v3.0.x',
-        versionSwitcher: {
-            text: 'Version',
-            includeCurrentVersion: true
-        }
+        versionSwitcher: false
     },
     themeConfig: {
         logo: '/logo.png',
@@ -53,6 +50,7 @@ export default defineVersionedConfig({
         sidebar: {
             root: [
                 { text: 'Getting Started', link: '/guide' },
+                { text: 'Release Notes', link: '/release' },
                 {
                     text: 'Types',
                     collapsed: false,
@@ -83,6 +81,7 @@ export default defineVersionedConfig({
             ],
             'v2.x.x': [
                 { text: 'Getting Started', link: '/guide' },
+                { text: 'Release Notes', link: '/release' },
                 {
                     text: 'Types',
                     collapsed: false,
