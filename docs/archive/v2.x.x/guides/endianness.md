@@ -60,6 +60,6 @@ error. If a value looks reordered, for example `0x04030201` instead of `0x010203
 
 ## See also
 
-- [Integers](/types/integers)
-- [Floats](/types/floats)
-- [Bitfields](/types/bitfields)
+- [Integers](../types/integers)
+- [Floats](../types/floats)
+- [Bitfields](../types/bitfields)

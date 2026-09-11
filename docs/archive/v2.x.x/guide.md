@@ -80,7 +80,7 @@ const next = buffer.subarray(consumed);
 
 ### `new Union<T>(schema)`
 
-A `Union` lays every member at offset 0 and sizes itself to the widest member. `toBuffer` writes the first member with a defined value; `toObject` decodes every member from the same bytes. See [Unions](/structures/unions).
+A `Union` lays every member at offset 0 and sizes itself to the widest member. `toBuffer` writes the first member with a defined value; `toObject` decodes every member from the same bytes. See [Unions](structures/unions).
 
 ### Field definitions
 
@@ -98,16 +98,16 @@ A `Union` lays every member at offset 0 and sizes itself to the widest member. `
 
 ## Types
 
-- [Integers](/types/integers): `UInt8` through `BigInt64BE`, with 64-bit values as `bigint`.
-- [Floats](/types/floats): `FloatLE/BE` and `DoubleLE/BE`.
-- [Strings](/types/strings): `string`, `utf8`, and `ascii`, in length-prefixed, fixed, or null-terminated layouts.
-- [Bitfields](/types/bitfields): sub-byte integers packed into a shared container.
+- [Integers](types/integers): `UInt8` through `BigInt64BE`, with 64-bit values as `bigint`.
+- [Floats](types/floats): `FloatLE/BE` and `DoubleLE/BE`.
+- [Strings](types/strings): `string`, `utf8`, and `ascii`, in length-prefixed, fixed, or null-terminated layouts.
+- [Bitfields](types/bitfields): sub-byte integers packed into a shared container.
 
 ## Structures
 
-- [Arrays](/structures/arrays): fixed-length sequences of any field.
-- [Nested Structs](/structures/nested-structs): compose structs to any depth.
-- [Unions](/structures/unions): overlapping members at offset 0.
+- [Arrays](structures/arrays): fixed-length sequences of any field.
+- [Nested Structs](structures/nested-structs): compose structs to any depth.
+- [Unions](structures/unions): overlapping members at offset 0.
 
 ## Error handling
 
@@ -123,4 +123,4 @@ Invalid schemas throw when the `Struct` is constructed, so mistakes surface befo
 
 ## Next steps
 
-- [Endianness](/guides/endianness)
+- [Endianness](guides/endianness)

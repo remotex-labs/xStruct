@@ -71,9 +71,9 @@ signed.toObject(signed.toBuffer({ delta: -2 })).delta; // -2
 
 ## Endianness
 
-The container is read and written using its type's endianness, so `UInt16BE:4` packs into a big-endian 16-bit integer. See [Endianness](/guides/endianness).
+The container is read and written using its type's endianness, so `UInt16BE:4` packs into a big-endian 16-bit integer. See [Endianness](../guides/endianness).
 
 ## See also
 
-- [Integers](/types/integers)
-- [Unions](/structures/unions)
+- [Integers](integers)
+- [Unions](../structures/unions)
