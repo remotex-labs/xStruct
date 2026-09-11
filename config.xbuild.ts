@@ -17,6 +17,9 @@ import pkg from './package.json' with { type: 'json' };
 
 export const config: xBuildConfig = {
     common: {
+        declaration: {
+            outDir: 'dist'
+        },
         esbuild: {
             bundle: true,
             minify: true,
