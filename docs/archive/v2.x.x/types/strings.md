@@ -98,6 +98,6 @@ The array passed to `toBuffer` must contain exactly N elements.
 
 ## See also
 
-- [Arrays](/structures/arrays)
-- [Nested Structs](/structures/nested-structs)
-- [Unions](/structures/unions) (only fixed-size strings are allowed in unions)
+- [Arrays](../structures/arrays)
+- [Nested Structs](../structures/nested-structs)
+- [Unions](../structures/unions) (only fixed-size strings are allowed in unions)

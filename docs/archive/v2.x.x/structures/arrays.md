@@ -35,7 +35,7 @@ new Struct({
 });
 ```
 
-See [Strings](/types/strings).
+See [Strings](../types/strings).
 
 ## Struct arrays
 
@@ -49,13 +49,13 @@ const Path = new Struct<{ points: { x: number; y: number }[] }>({
 });
 ```
 
-Embed a struct instance directly for a single value, and use `{ type, arraySize }` for an array. See [Nested Structs](/structures/nested-structs).
+Embed a struct instance directly for a single value, and use `{ type, arraySize }` for an array. See [Nested Structs](nested-structs).
 
 ## Sizing
 
-A fixed array contributes `N * elementSize` to `size`. Arrays of dynamic strings extend the buffer beyond `size`; use the `getDynamicOffset` callback when reading them. See [Working with Buffers](/guide#working-with-buffers).
+A fixed array contributes `N * elementSize` to `size`. Arrays of dynamic strings extend the buffer beyond `size`; use the `getDynamicOffset` callback when reading them. See [the `Struct` API](../guide#api).
 
 ## See also
 
-- [Nested Structs](/structures/nested-structs)
-- [Strings](/types/strings)
+- [Nested Structs](nested-structs)
+- [Strings](../types/strings)

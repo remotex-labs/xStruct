@@ -82,5 +82,5 @@ have a constant width, so they overlap safely.
 
 ## See also
 
-- [Nested Structs](/structures/nested-structs)
-- [Strings](/types/strings)
+- [Nested Structs](nested-structs)
+- [Strings](../types/strings)

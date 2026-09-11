@@ -46,7 +46,7 @@ f.toObject(f.toBuffer({ v: 0.1 })).v; // 0.10000000149011612
 const transform = new Struct<{ matrix: number[] }>({ matrix: 'FloatLE[16]' }); // a 4x4 matrix
 ```
 
-See [Arrays](/structures/arrays).
+See [Arrays](../structures/arrays).
 
 ## Special values
 
@@ -54,5 +54,5 @@ See [Arrays](/structures/arrays).
 
 ## See also
 
-- [Integers](/types/integers)
-- [Endianness](/guides/endianness)
+- [Integers](integers)
+- [Endianness](../guides/endianness)

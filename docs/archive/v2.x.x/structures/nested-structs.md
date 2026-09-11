@@ -28,7 +28,7 @@ const Polygon = new Struct<{ points: { x: number; y: number }[] }>({
 });
 ```
 
-See [Arrays](/structures/arrays).
+See [Arrays](arrays).
 
 ## Deep nesting
 
@@ -45,9 +45,9 @@ const Message = new Struct({ header: Header, body: Body });
 
 A nested struct that contains dynamic strings makes the parent buffer larger than `size`. When reading such a
 struct, use the `getDynamicOffset` callback to find where the data ends. See
-[Working with Buffers](/guide#working-with-buffers).
+[the `Struct` API](../guide#api).
 
 ## See also
 
-- [Arrays](/structures/arrays)
-- [Unions](/structures/unions)
+- [Arrays](arrays)
+- [Unions](unions)

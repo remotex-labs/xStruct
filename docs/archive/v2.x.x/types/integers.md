@@ -64,7 +64,7 @@ samples.toObject(samples.toBuffer({ values: [ 10, 20, 30, 40 ] })).values;
 // [ 10, 20, 30, 40 ]
 ```
 
-See [Arrays](/structures/arrays).
+See [Arrays](../structures/arrays).
 
 ## Overflow
 
@@ -76,6 +76,6 @@ new Struct<{ b: number }>({ b: 'UInt8' }).toBuffer({ b: 300 }); // throws
 
 ## See also
 
-- [Floats](/types/floats)
-- [Bitfields](/types/bitfields)
-- [Endianness](/guides/endianness)
+- [Floats](floats)
+- [Bitfields](bitfields)
+- [Endianness](../guides/endianness)
