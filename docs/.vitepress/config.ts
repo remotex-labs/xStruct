@@ -121,7 +121,7 @@ export default defineVersionedConfig({
         },
         footer: {
             message: 'Released under the Mozilla Public License 2.0',
-            copyright: `Copyright © ${ new Date().getFullYear() } @remotex-labs/xBuild Contributors`
+            copyright: `Copyright © ${ new Date().getFullYear() } @remotex-labs/xStruct Contributors`
         }
     }
 });
